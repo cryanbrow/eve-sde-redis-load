@@ -2,17 +2,20 @@ package main
 
 import (
 	"archive/zip"
-	"errors"
 	"fmt"
 	"io"
 	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/cryanbrow/eve-sde-redis-load/data"
+	"github.com/cryanbrow/eve-sde-redis-load/model"
 )
 
 func main() {
 
+	data.ConfigureCaching()
 	// https://eve-static-data-export.s3-eu-west-1.amazonaws.com/tranquility/sde.zip
 	// https://eve-static-data-export.s3-eu-west-1.amazonaws.com/tranquility/checksum
 
@@ -65,40 +68,25 @@ func UnzipFile() {
 
 		_, err = os.ReadFile(dstFile.Name())
 		check(err)
-		fmt.Println(DetermineModelType(dstFile.Name()))
+		DetermineModelType(dstFile.Name())
 
 		dstFile.Close()
 		fileInArchive.Close()
 	}
 }
 
-func DetermineModelType(fileName string) string {
+func DetermineModelType(fileName string) {
 	if strings.HasPrefix(fileName, "sde"+string(os.PathSeparator)+"sde"+string(os.PathSeparator)+"bsd") {
-		return "bsd file"
+		fmt.Println("bsd file")
+	} else if fileName == "sde"+string(os.PathSeparator)+"sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.Agents+model.Yaml {
+		fmt.Println("Agents")
+	} else if fileName == "sde"+string(os.PathSeparator)+"sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.AgentsInSpace+model.Yaml {
+		fmt.Println("AgentsInSpace")
+	} else if fileName == "sde"+string(os.PathSeparator)+"sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.Ancestries+model.Yaml {
+		fmt.Println("Ancestries")
+	} else {
+		fmt.Println("fsd file")
 	}
-	switch fileName {
-	case local_model.Agents:
-		return *ids.Agents[0].ID, nil
-	case local_model.Alliances:
-		return *ids.Alliances[0].ID, nil
-	case local_model.Characters:
-		return *ids.Characters[0].ID, nil
-	case local_model.Constellations:
-		return *ids.Constellations[0].ID, nil
-	case local_model.Corporations:
-		return *ids.Corporations[0].ID, nil
-	case local_model.Factions:
-		return *ids.Factions[0].ID, nil
-	case local_model.InventoryTypes:
-		return *ids.InventoryTypes[0].ID, nil
-	case local_model.Regions:
-		return *ids.Regions[0].ID, nil
-	case local_model.Systems:
-		return *ids.Systems[0].ID, nil
-	default:
-		return 0, errors.New("all fields nil")
-	}
-
 }
 
 func DownloadFile(filepath string, url string) error {
