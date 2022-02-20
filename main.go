@@ -19,8 +19,8 @@ func main() {
 	// https://eve-static-data-export.s3-eu-west-1.amazonaws.com/tranquility/sde.zip
 	// https://eve-static-data-export.s3-eu-west-1.amazonaws.com/tranquility/checksum
 
-	//DownloadFile("sde.zip", "https://eve-static-data-export.s3-eu-west-1.amazonaws.com/tranquility/sde.zip")
-	//DownloadFile("checksum", "https://eve-static-data-export.s3-eu-west-1.amazonaws.com/tranquility/checksum")
+	DownloadFile("sde.zip", "https://eve-static-data-export.s3-eu-west-1.amazonaws.com/tranquility/sde.zip")
+	DownloadFile("checksum", "https://eve-static-data-export.s3-eu-west-1.amazonaws.com/tranquility/checksum")
 
 	UnzipFile()
 
