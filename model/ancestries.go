@@ -64,7 +64,7 @@ func LoadRedisAncestries(path string) {
 		singleAncestry := sdeAncestries[k]
 		singleAncestry.ID = k
 		singleAncestryJSON, _ := json.Marshal(singleAncestry)
-		redisKey := "agent:" + strconv.Itoa(k)
+		redisKey := "ancestry:" + strconv.Itoa(k)
 		status := data.Rdb.Set(context.Background(), redisKey, singleAncestryJSON, 0)
 		statusText, _ := status.Result()
 		fmt.Printf("status text: %s \n", statusText)
