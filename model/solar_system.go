@@ -12,7 +12,7 @@ var sdeSolarSystem solarSystem
 
 type solarSystem map[int]struct {
 	Border                     bool             `yaml:"border" json:"border"`
-	Center                     []float64        `yaml:"center" json:"center"`
+	Center                     []float64        `yaml:"center"`
 	ConstellationID            int              `json:"constellationID"`
 	Corridor                   bool             `yaml:"corridor" json:"corridor"`
 	DisallowedAnchorCategories []int            `yaml:"disallowedAnchorCategories" json:"disallowedAnchorCategories"`
@@ -21,9 +21,12 @@ type solarSystem map[int]struct {
 	Hub                        bool             `yaml:"hub" json:"hub"`
 	International              bool             `yaml:"international" json:"international"`
 	Luminosity                 float64          `yaml:"luminosity" json:"luminosity"`
-	Max                        []float64        `yaml:"max" json:"max"`
-	Min                        []float64        `yaml:"min" json:"min"`
-	Planets                    map[int]planet   `yaml:"planets" json:"planets"`
+	MaxArray                   []float64        `yaml:"max"`
+	Max                        position         `json:"max"`
+	MinArray                   []float64        `yaml:"min"`
+	Min                        position         `json:"min"`
+	Planets                    map[int]planet   `yaml:"planets"`
+	Position                   position         `json:"position"`
 	Radius                     float64          `yaml:"radius" json:"radius"`
 	Regional                   bool             `yaml:"regional" json:"regional"`
 	RegionID                   int              `json:"regionID"`
@@ -31,15 +34,21 @@ type solarSystem map[int]struct {
 	SecurityClass              string           `yaml:"securityClass" json:"securityClass"`
 	SolarSystemID              int              `yaml:"solarSystemID" json:"solarSystemID"`
 	SolarSystemNameID          int              `yaml:"solarSystemNameID" json:"solarSystemNameID"`
-	Star                       starType         `yaml:"star" json:"star"`
-	Stargates                  map[int]stargate `yaml:"stargates" json:"stargates"`
+	Star                       starType         `yaml:"star"`
+	StarID                     int              `json:"star_id"`
+	Stargates                  map[int]stargate `yaml:"stargates"`
+	StargateIDs                []int            `json:"stargates"`
+	SystemPlanets              []systemPlanet   `json:"planets"`
 	SunTypeID                  int              `yaml:"sunTypeID" json:"sunTypeID"`
 }
 
 type asteroidBelt struct {
-	Position   []float64      `yaml:"position" json:"position"`
-	Statistics statisticsType `yaml:"statistics" json:"statistics"`
-	TypeID     int            `yaml:"typeID" json:"typeID"`
+	Name          string         `json:"name"`
+	PositionArray []float64      `yaml:"position"`
+	Position      position       `json:"position"`
+	Statistics    statisticsType `yaml:"statistics" json:"statistics"`
+	SystemID      int            `json:"system_id"`
+	TypeID        int            `yaml:"typeID" json:"typeID"`
 }
 
 type statisticsType struct {
@@ -76,7 +85,8 @@ type planet struct {
 	CelestialIndex   int                  `yaml:"celestialIndex" json:"celestialIndex"`
 	Moons            map[int]moon         `yaml:"moons" json:"moons"`
 	PlanetAttributes planetAttributesType `yaml:"planetAttributes" json:"planetAttributes"`
-	Position         []float64            `yaml:"position" json:"position"`
+	PositionArray    []float64            `yaml:"position"`
+	Position         position             `json:"position"`
 	Radius           int                  `yaml:"radius" json:"radius"`
 	Statistics       statisticsType       `yaml:"statistics" json:"statistics"`
 	TypeID           int                  `yaml:"typeID" json:"typeID"`
@@ -92,7 +102,8 @@ type planetAttributesType struct {
 type moon struct {
 	NPCStations      map[int]npcStation
 	PlanetAttributes planetAttributesType `yaml:"planetAttributes" json:"planetAttributes"`
-	Position         []float64            `yaml:"position" json:"position"`
+	PositionArray    []float64            `yaml:"position"`
+	Position         position             `json:"position"`
 	Padius           int                  `yaml:"radius" json:"radius"`
 	Statistics       statisticsType       `yaml:"statistics" json:"statistics"`
 	TypeID           int                  `yaml:"typeID" json:"typeID"`
@@ -103,12 +114,25 @@ type npcStation struct {
 	IsConquerable            bool      `yaml:"isConquerable" json:"isConquerable"`
 	OperationID              int       `yaml:"operationID" json:"operationID"`
 	OwnerID                  int       `yaml:"ownerID" json:"ownerID"`
-	Position                 []float64 `yaml:"position" json:"position"`
+	PositionArray            []float64 `yaml:"position"`
+	Position                 position  `json:"position"`
 	ReprocessingEfficiency   float32   `yaml:"reprocessingEfficiency" json:"reprocessingEfficiency"`
 	ReprocessingHangarFlag   int       `yaml:"reprocessingHangarFlag" json:"reprocessingHangarFlag"`
 	ReprocessingStationsTake float32   `yaml:"reprocessingStationsTake" json:"reprocessingStationsTake"`
 	TypeID                   int       `yaml:"typeID" json:"typeID"`
 	UseOperationName         bool      `yaml:"useOperationName" json:"useOperationName"`
+}
+
+type position struct {
+	X float64 `json:"x"`
+	Y float64 `json:"y"`
+	Z float64 `json:"z"`
+}
+
+type systemPlanet struct {
+	AsteroidBelts []int `json:"asteroid_belts"`
+	Moons         []int `json:"moons"`
+	PlanetID      int   `json:"planet_id"`
 }
 
 type starType struct {
@@ -119,9 +143,10 @@ type starType struct {
 }
 
 type stargate struct {
-	Destination int       `yaml:"destination" json:"destination"`
-	Position    []float64 `yaml:"position" json:"position"`
-	TypeID      int       `yaml:"typeID" json:"typeID"`
+	Destination   int       `yaml:"destination" json:"destination"`
+	PositionArray []float64 `yaml:"position"`
+	Position      position  `json:"position"`
+	TypeID        int       `yaml:"typeID" json:"typeID"`
 }
 
 func LoadSolarSystem(path string) {
