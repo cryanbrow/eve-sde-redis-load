@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"gopkg.in/yaml.v3"
 )
@@ -22,9 +23,10 @@ type solarSystem struct {
 	Luminosity                 float64          `yaml:"luminosity" json:"luminosity"`
 	MaxArray                   []float64        `yaml:"max" json:"-"`
 	Max                        position         `yaml:"-" json:"max"`
-	MinArray                   []float64        `yaml:"min"`
+	MinArray                   []float64        `yaml:"min" json:"-"`
 	Min                        position         `yaml:"-" json:"min"`
-	Planets                    map[int]planet   `yaml:"planets"`
+	Name                       string           `yaml:"-" json:"name"`
+	Planets                    map[int]planet   `yaml:"planets" json:"-"`
 	Position                   position         `yaml:"-" json:"position"`
 	Radius                     float64          `yaml:"radius" json:"radius"`
 	Regional                   bool             `yaml:"regional" json:"regional"`
@@ -37,6 +39,7 @@ type solarSystem struct {
 	StarID                     int              `yaml:"-" json:"star_id"`
 	Stargates                  map[int]stargate `yaml:"stargates" json:"-"`
 	StargateIDs                []int            `yaml:"-" json:"stargates"`
+	Stations                   []int            `yaml:"-" json:"stations"`
 	SystemPlanets              []systemPlanet   `yaml:"-" json:"planets"`
 	SunTypeID                  int              `yaml:"sunTypeID" json:"sun_type_id"`
 }
@@ -99,7 +102,7 @@ type planetAttributesType struct {
 }
 
 type moon struct {
-	NPCStations      map[int]npcStation
+	NPCStations      map[int]npcStation   `yaml:"npcStations" json:"-"`
 	PlanetAttributes planetAttributesType `yaml:"planetAttributes" json:"planet_attributes"`
 	PositionArray    []float64            `yaml:"position" json:"-"`
 	Position         position             `yaml:"-" json:"position"`
@@ -165,9 +168,98 @@ func LoadSolarSystem(path string) {
 		fmt.Println(err.Error())
 	}
 
+	sdeSolarSystem.Max.X = sdeSolarSystem.MaxArray[0]
+	sdeSolarSystem.Max.Y = sdeSolarSystem.MaxArray[1]
+	sdeSolarSystem.Max.Z = sdeSolarSystem.MaxArray[2]
+
+	sdeSolarSystem.Min.X = sdeSolarSystem.MinArray[0]
+	sdeSolarSystem.Min.Y = sdeSolarSystem.MinArray[1]
+	sdeSolarSystem.Min.Z = sdeSolarSystem.MinArray[2]
+
+	sdeSolarSystem.Position.X = sdeSolarSystem.Center[0]
+	sdeSolarSystem.Position.Y = sdeSolarSystem.Center[1]
+	sdeSolarSystem.Position.Z = sdeSolarSystem.Center[2]
+
+	sdeSolarSystem.StarID = sdeSolarSystem.Star.Id
+
+	sdeSolarSystem.StargateIDs = getStargateMapKeys(sdeSolarSystem.Stargates)
+
+	for planetKey, planet := range sdeSolarSystem.Planets {
+		var localSystemPlanet systemPlanet
+		localSystemPlanet.PlanetID = planetKey
+		localSystemPlanet.Moons = getMoonMapKeys(planet.Moons)
+		localSystemPlanet.AsteroidBelts = getAsteroidBeltMapKeys(planet.AsteroidBelts)
+		sdeSolarSystem.SystemPlanets = append(sdeSolarSystem.SystemPlanets, localSystemPlanet)
+		for _, moon := range planet.Moons {
+			for stationID := range moon.NPCStations {
+				sdeSolarSystem.Stations = append(sdeSolarSystem.Stations, stationID)
+			}
+		}
+	}
+
+	sdeSolarSystem.Name = determineSystemNameFromFilePath(path)
+
+	sdeSolarSystem.ConstellationID = ids[determineConstallationNameFromFilePath(path)].ItemID
+
+	sdeSolarSystem.RegionID = ids[determineRegionNameFromFilePath(path)].ItemID
+
 	singleSolarSystemJSON, _ := json.Marshal(sdeSolarSystem)
 	str1 := string(singleSolarSystemJSON[:])
 
-	fmt.Println(str1)
+	fmt.Print(str1)
 
+}
+
+func getStargateMapKeys(m map[int]stargate) []int {
+	j := 0
+	keys := make([]int, len(m))
+	for k := range m {
+		keys[j] = k
+		j++
+	}
+	return keys
+}
+
+func getMoonMapKeys(m map[int]moon) []int {
+	j := 0
+	keys := make([]int, len(m))
+	for k := range m {
+		keys[j] = k
+		j++
+	}
+	return keys
+}
+
+func getAsteroidBeltMapKeys(m map[int]asteroidBelt) []int {
+	j := 0
+	keys := make([]int, len(m))
+	for k := range m {
+		keys[j] = k
+		j++
+	}
+	return keys
+}
+
+func determineSystemNameFromFilePath(path string) string {
+	values := strings.Split(path, string(os.PathSeparator))
+	if len(values) == 9 {
+		return values[7]
+	}
+	return ""
+}
+
+func determineConstallationNameFromFilePath(path string) string {
+	values := strings.Split(path, string(os.PathSeparator))
+	if len(values) == 9 {
+		return values[6]
+	}
+	return ""
+}
+
+func determineRegionNameFromFilePath(path string) string {
+	values := strings.Split(path, string(os.PathSeparator))
+	if len(values) == 9 {
+		return values[5]
+	}
+	return ""
 }

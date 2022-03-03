@@ -24,6 +24,8 @@ func main() {
 
 	//UnzipFile()
 
+	model.LoadUniqueNames("sde" + string(os.PathSeparator) + "sde" + string(os.PathSeparator) + "bsd" + string(os.PathSeparator) + "invUniqueNames.yaml")
+
 	model.LoadSolarSystem("sde" + string(os.PathSeparator) + "sde" + string(os.PathSeparator) + "fsd" + string(os.PathSeparator) + "universe" + string(os.PathSeparator) + "eve" + string(os.PathSeparator) + "Metropolis" + string(os.PathSeparator) + "Aptetter" + string(os.PathSeparator) + "Erstur" + string(os.PathSeparator) + "solarsystem.staticdata")
 
 }
