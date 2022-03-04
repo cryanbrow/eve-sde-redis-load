@@ -83,15 +83,20 @@ type starStatisticsType struct {
 }
 
 type planet struct {
-	AsteroidBelts    map[int]asteroidBelt `yaml:"asteroidBelts" json:"asteroid_belts"`
-	CelestialIndex   int                  `yaml:"celestialIndex" json:"celestial_index"`
-	Moons            map[int]moon         `yaml:"moons" json:"moons"`
-	PlanetAttributes planetAttributesType `yaml:"planetAttributes" json:"planet_attributes"`
-	PositionArray    []float64            `yaml:"position" json:"-"`
-	Position         position             `yaml:"-" json:"position"`
-	Radius           int                  `yaml:"radius" json:"radius"`
-	Statistics       statisticsType       `yaml:"statistics" json:"statistics"`
-	TypeID           int                  `yaml:"typeID" json:"type_id"`
+	AsteroidBelts     map[int]asteroidBelt `yaml:"asteroidBelts" json:"-"`
+	AsteroidBeltArray []int                `yaml:"-" json:"asteroid_belts"`
+	CelestialIndex    int                  `yaml:"celestialIndex" json:"celestial_index"`
+	Moons             map[int]moon         `yaml:"moons" json:"-"`
+	MoonArray         []int                `yaml:"-" json:"moons"`
+	Name              string               `yaml:"-" json:"name"`
+	PlanetAttributes  planetAttributesType `yaml:"planetAttributes" json:"planet_attributes"`
+	PlanetID          int                  `yaml:"-" json:"planet_id"`
+	PositionArray     []float64            `yaml:"position" json:"-"`
+	Position          position             `yaml:"-" json:"position"`
+	Radius            int                  `yaml:"radius" json:"radius"`
+	Statistics        statisticsType       `yaml:"statistics" json:"statistics"`
+	SystemID          int                  `yaml:"-" json:"system_id"`
+	TypeID            int                  `yaml:"typeID" json:"type_id"`
 }
 
 type planetAttributesType struct {
@@ -102,11 +107,14 @@ type planetAttributesType struct {
 }
 
 type moon struct {
+	ID               int                  `yaml:"-" json:"moon_id"`
+	Name             string               `yaml:"-" json:"name"`
 	NPCStations      map[int]npcStation   `yaml:"npcStations" json:"-"`
 	PlanetAttributes planetAttributesType `yaml:"planetAttributes" json:"planet_attributes"`
 	PositionArray    []float64            `yaml:"position" json:"-"`
 	Position         position             `yaml:"-" json:"position"`
-	Padius           int                  `yaml:"radius" json:"radius"`
+	Radius           int                  `yaml:"radius" json:"radius"`
+	Stations         []int                `yaml:"-" json:"stations"`
 	Statistics       statisticsType       `yaml:"statistics" json:"statistics"`
 	TypeID           int                  `yaml:"typeID" json:"type_id"`
 }
@@ -185,14 +193,56 @@ func LoadSolarSystem(path string) {
 	sdeSolarSystem.StargateIDs = getStargateMapKeys(sdeSolarSystem.Stargates)
 
 	for planetKey, planet := range sdeSolarSystem.Planets {
+		planet.AsteroidBeltArray = getAsteroidBeltMapKeys(planet.AsteroidBelts)
+		planet.MoonArray = getMoonMapKeys(planet.Moons)
+		planet.Name = names[planetKey].ItemName
+		planet.Position.X = planet.PositionArray[0]
+		planet.Position.Y = planet.PositionArray[1]
+		planet.Position.Z = planet.PositionArray[2]
+		planet.SystemID = sdeSolarSystem.SolarSystemID
+		planet.PlanetID = planetKey
+
+		singlePlanetJSON, _ := json.MarshalIndent(planet, "", "  ")
+		singlePlanetJSONString := string(singlePlanetJSON[:])
+
+		fmt.Println(singlePlanetJSONString)
+
 		var localSystemPlanet systemPlanet
 		localSystemPlanet.PlanetID = planetKey
 		localSystemPlanet.Moons = getMoonMapKeys(planet.Moons)
 		localSystemPlanet.AsteroidBelts = getAsteroidBeltMapKeys(planet.AsteroidBelts)
 		sdeSolarSystem.SystemPlanets = append(sdeSolarSystem.SystemPlanets, localSystemPlanet)
-		for _, moon := range planet.Moons {
-			for stationID := range moon.NPCStations {
-				sdeSolarSystem.Stations = append(sdeSolarSystem.Stations, stationID)
+
+		for asteroidBeltKey, asteroidBelt := range planet.AsteroidBelts {
+			asteroidBelt.Name = names[asteroidBeltKey].ItemName
+			asteroidBelt.Position.X = asteroidBelt.PositionArray[0]
+			asteroidBelt.Position.Y = asteroidBelt.PositionArray[1]
+			asteroidBelt.Position.Z = asteroidBelt.PositionArray[2]
+			asteroidBelt.SystemID = sdeSolarSystem.SolarSystemID
+
+			singleAsteroidBeltJSON, _ := json.MarshalIndent(asteroidBelt, "", "  ")
+			singleAsteroidBeltJSONString := string(singleAsteroidBeltJSON[:])
+
+			fmt.Println(singleAsteroidBeltJSONString)
+		}
+
+		for moonKey, moon := range planet.Moons {
+			moon.ID = moonKey
+			moon.Name = names[moonKey].ItemName
+			moon.Position.X = moon.PositionArray[0]
+			moon.Position.Y = moon.PositionArray[1]
+			moon.Position.Z = moon.PositionArray[2]
+			moon.Stations = getStationMapKeys(moon.NPCStations)
+
+			singleMoonJSON, _ := json.MarshalIndent(moon, "", "  ")
+			singleMoonJSONString := string(singleMoonJSON[:])
+
+			fmt.Println(singleMoonJSONString)
+
+			for stationKey, station := range moon.NPCStations {
+				fmt.Println(station)
+
+				sdeSolarSystem.Stations = append(sdeSolarSystem.Stations, stationKey)
 			}
 		}
 	}
@@ -203,10 +253,10 @@ func LoadSolarSystem(path string) {
 
 	sdeSolarSystem.RegionID = ids[determineRegionNameFromFilePath(path)].ItemID
 
-	singleSolarSystemJSON, _ := json.Marshal(sdeSolarSystem)
-	str1 := string(singleSolarSystemJSON[:])
+	//singleSolarSystemJSON, _ := json.MarshalIndent(sdeSolarSystem, "", "  ")
+	//str1 := string(singleSolarSystemJSON[:])
 
-	fmt.Print(str1)
+	//fmt.Println(str1)
 
 }
 
@@ -231,6 +281,16 @@ func getMoonMapKeys(m map[int]moon) []int {
 }
 
 func getAsteroidBeltMapKeys(m map[int]asteroidBelt) []int {
+	j := 0
+	keys := make([]int, len(m))
+	for k := range m {
+		keys[j] = k
+		j++
+	}
+	return keys
+}
+
+func getStationMapKeys(m map[int]npcStation) []int {
 	j := 0
 	keys := make([]int, len(m))
 	for k := range m {

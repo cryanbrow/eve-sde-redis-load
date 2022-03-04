@@ -15,6 +15,12 @@ import (
 
 func main() {
 
+	//Order concerns
+	/*
+		group_ids goes before invUniqueNames
+		invUniqueNames goes before any solar system/region/constellation
+	*/
+
 	data.ConfigureCaching()
 	// https://eve-static-data-export.s3-eu-west-1.amazonaws.com/tranquility/sde.zip
 	// https://eve-static-data-export.s3-eu-west-1.amazonaws.com/tranquility/checksum
@@ -22,9 +28,9 @@ func main() {
 	//DownloadFile("sde.zip", "https://eve-static-data-export.s3-eu-west-1.amazonaws.com/tranquility/sde.zip")
 	//DownloadFile("checksum", "https://eve-static-data-export.s3-eu-west-1.amazonaws.com/tranquility/checksum")
 
-	//UnzipFile()
+	UnzipFile()
 
-	model.LoadUniqueNames("sde" + string(os.PathSeparator) + "sde" + string(os.PathSeparator) + "bsd" + string(os.PathSeparator) + "invUniqueNames.yaml")
+	//model.LoadUniqueNames("sde" + string(os.PathSeparator) + "sde" + string(os.PathSeparator) + "bsd" + string(os.PathSeparator) + "invUniqueNames.yaml")
 
 	model.LoadSolarSystem("sde" + string(os.PathSeparator) + "sde" + string(os.PathSeparator) + "fsd" + string(os.PathSeparator) + "universe" + string(os.PathSeparator) + "eve" + string(os.PathSeparator) + "Metropolis" + string(os.PathSeparator) + "Aptetter" + string(os.PathSeparator) + "Erstur" + string(os.PathSeparator) + "solarsystem.staticdata")
 
@@ -80,8 +86,8 @@ func UnzipFile() {
 }
 
 func DetermineModelType(fileName string) {
-	if strings.HasPrefix(fileName, "sde"+string(os.PathSeparator)+"sde"+string(os.PathSeparator)+"bsd") {
-		fmt.Println("bsd file")
+	if strings.HasPrefix(fileName, "sde"+string(os.PathSeparator)+"sde"+string(os.PathSeparator)+"bsd"+string(os.PathSeparator)+"invUniqueNames.yaml") {
+		model.LoadUniqueNames("sde" + string(os.PathSeparator) + "sde" + string(os.PathSeparator) + "bsd" + string(os.PathSeparator) + "invUniqueNames.yaml")
 	} else if fileName == "sde"+string(os.PathSeparator)+"sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.Agents+model.Yaml {
 		fmt.Println("Agents")
 	} else if fileName == "sde"+string(os.PathSeparator)+"sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.AgentsInSpace+model.Yaml {
