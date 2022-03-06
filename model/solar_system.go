@@ -1,7 +1,6 @@
 package model
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -73,13 +72,13 @@ type statisticsType struct {
 }
 
 type starStatisticsType struct {
-	Age           float64 `yaml:"age" json:"age"`
+	Age           int     `yaml:"age" json:"age"`
 	Life          float64 `yaml:"life" json:"life"`
 	Locked        bool    `yaml:"locked" json:"locked"`
 	Luminosity    float64 `yaml:"luminosity" json:"luminosity"`
 	Radius        float64 `yaml:"radius" json:"radius"`
 	SpectralClass string  `yaml:"spectralClass" json:"spectral_class"`
-	Temperature   float64 `yaml:"temperature" json:"temperature"`
+	Temperature   int     `yaml:"temperature" json:"temperature"`
 }
 
 type planet struct {
@@ -157,15 +156,21 @@ type systemPlanet struct {
 }
 
 type starType struct {
-	Id         int                `yaml:"id" json:"id"`
-	Name       string             `yaml:"-" json:"name"`
-	Radius     int                `yaml:"radius" json:"radius"`
-	Statistics starStatisticsType `yaml:"statistics" json:"statistics"`
-	TypeID     int                `yaml:"typeID" json:"type_id"`
+	Age           int                `yaml:"-" json:"age"`
+	ID            int                `yaml:"id" json:"id"`
+	Luminosity    float64            `yaml:"-" json:"luminosity"`
+	Name          string             `yaml:"-" json:"name"`
+	Radius        int                `yaml:"radius" json:"radius"`
+	SolarSystemID int                `yaml:"-" json:"solar_system_id"`
+	SpectralClass string             `yaml:"-" json:"spectral_class"`
+	Statistics    starStatisticsType `yaml:"statistics" json:"statistics"`
+	Temperature   int                `yaml:"-" json:"temperature"`
+	TypeID        int                `yaml:"typeID" json:"type_id"`
 }
 
 type stargate struct {
 	Destination   int       `yaml:"destination" json:"destination"`
+	ID            int       `yaml:"-" json:"id"`
 	Name          string    `yaml:"-" json:"name"`
 	PositionArray []float64 `yaml:"position" json:"-"`
 	Position      position  `yaml:"-" json:"position"`
@@ -201,25 +206,24 @@ func LoadSolarSystem(path string) {
 	sdeSolarSystem.Position.Y = sdeSolarSystem.Center[1]
 	sdeSolarSystem.Position.Z = sdeSolarSystem.Center[2]
 
-	sdeSolarSystem.StarID = sdeSolarSystem.Star.Id
+	sdeSolarSystem.StarID = sdeSolarSystem.Star.ID
 
 	sdeSolarSystem.Star.Name = names[sdeSolarSystem.StarID].ItemName
+	sdeSolarSystem.Star.Age = sdeSolarSystem.Star.Statistics.Age
+	sdeSolarSystem.Star.Luminosity = sdeSolarSystem.Star.Statistics.Luminosity
+	sdeSolarSystem.Star.SolarSystemID = sdeSolarSystem.SolarSystemID
+	sdeSolarSystem.Star.SpectralClass = sdeSolarSystem.Star.Statistics.SpectralClass
+	sdeSolarSystem.Star.Temperature = sdeSolarSystem.Star.Statistics.Temperature
 
 	sdeSolarSystem.StargateIDs = getStargateMapKeys(sdeSolarSystem.Stargates)
 
 	for stargateKey, stargate := range sdeSolarSystem.Stargates {
-		//TODO this requires the loading of the InvNames file.
-		stargate.Name = names[stargateKey].ItemName
-		fmt.Println(stargateKey)
+		stargate.Name = invNames[stargateKey]
+		stargate.ID = stargateKey
 
 		stargate.Position.X = stargate.PositionArray[0]
 		stargate.Position.Y = stargate.PositionArray[1]
 		stargate.Position.Z = stargate.PositionArray[2]
-
-		singleStargateJSON, _ := json.MarshalIndent(stargate, "", "  ")
-		singleStargateJSONString := string(singleStargateJSON[:])
-
-		fmt.Println(singleStargateJSONString)
 	}
 
 	for planetKey, planet := range sdeSolarSystem.Planets {
@@ -231,11 +235,6 @@ func LoadSolarSystem(path string) {
 		planet.Position.Z = planet.PositionArray[2]
 		planet.SystemID = sdeSolarSystem.SolarSystemID
 		planet.PlanetID = planetKey
-
-		/*singlePlanetJSON, _ := json.MarshalIndent(planet, "", "  ")
-		singlePlanetJSONString := string(singlePlanetJSON[:])
-
-		fmt.Println(singlePlanetJSONString)*/
 
 		var localSystemPlanet systemPlanet
 		localSystemPlanet.PlanetID = planetKey
@@ -249,11 +248,6 @@ func LoadSolarSystem(path string) {
 			asteroidBelt.Position.Y = asteroidBelt.PositionArray[1]
 			asteroidBelt.Position.Z = asteroidBelt.PositionArray[2]
 			asteroidBelt.SystemID = sdeSolarSystem.SolarSystemID
-
-			/*singleAsteroidBeltJSON, _ := json.MarshalIndent(asteroidBelt, "", "  ")
-			singleAsteroidBeltJSONString := string(singleAsteroidBeltJSON[:])
-
-			fmt.Println(singleAsteroidBeltJSONString)*/
 		}
 
 		for moonKey, moon := range planet.Moons {
@@ -263,11 +257,6 @@ func LoadSolarSystem(path string) {
 			moon.Position.Y = moon.PositionArray[1]
 			moon.Position.Z = moon.PositionArray[2]
 			moon.Stations = getStationMapKeys(moon.NPCStations)
-
-			/*singleMoonJSON, _ := json.MarshalIndent(moon, "", "  ")
-			singleMoonJSONString := string(singleMoonJSON[:])
-
-			fmt.Println(singleMoonJSONString)*/
 
 			for stationKey, station := range moon.NPCStations {
 				var singleStaSation staStation = staStations[stationKey]
@@ -290,11 +279,6 @@ func LoadSolarSystem(path string) {
 				station.Position.Y = singleStaSation.Y
 				station.Position.Z = singleStaSation.Z
 
-				/*singleStationJSON, _ := json.MarshalIndent(station, "", "  ")
-				singleStationJSONString := string(singleStationJSON[:])
-
-				fmt.Println(singleStationJSONString)*/
-
 				sdeSolarSystem.Stations = append(sdeSolarSystem.Stations, stationKey)
 			}
 		}
@@ -305,11 +289,7 @@ func LoadSolarSystem(path string) {
 	sdeSolarSystem.ConstellationID = ids[determineConstallationNameFromFilePath(path)].ItemID
 
 	sdeSolarSystem.RegionID = ids[determineRegionNameFromFilePath(path)].ItemID
-
-	/*singleSolarSystemJSON, _ := json.MarshalIndent(sdeSolarSystem, "", "  ")
-	str1 := string(singleSolarSystemJSON[:])
-
-	fmt.Println(str1)*/
+	fmt.Println(sdeSolarSystem.Name)
 
 }
 

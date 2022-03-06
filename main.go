@@ -28,11 +28,12 @@ func main() {
 	//DownloadFile("sde.zip", "https://eve-static-data-export.s3-eu-west-1.amazonaws.com/tranquility/sde.zip")
 	//DownloadFile("checksum", "https://eve-static-data-export.s3-eu-west-1.amazonaws.com/tranquility/checksum")
 
+	model.LoadStaStations("sde" + string(os.PathSeparator) + "sde" + string(os.PathSeparator) + "bsd" + string(os.PathSeparator) + "staStations.yaml")
+	model.LoadInvNames("sde" + string(os.PathSeparator) + "sde" + string(os.PathSeparator) + "bsd" + string(os.PathSeparator) + "invNames.yaml")
+
 	UnzipFile()
 
-	model.LoadStaStations("sde" + string(os.PathSeparator) + "sde" + string(os.PathSeparator) + "bsd" + string(os.PathSeparator) + "staStations.yaml")
-
-	model.LoadSolarSystem("sde" + string(os.PathSeparator) + "sde" + string(os.PathSeparator) + "fsd" + string(os.PathSeparator) + "universe" + string(os.PathSeparator) + "eve" + string(os.PathSeparator) + "Metropolis" + string(os.PathSeparator) + "Aptetter" + string(os.PathSeparator) + "Erstur" + string(os.PathSeparator) + "solarsystem.staticdata")
+	//model.LoadSolarSystem("sde" + string(os.PathSeparator) + "sde" + string(os.PathSeparator) + "fsd" + string(os.PathSeparator) + "universe" + string(os.PathSeparator) + "eve" + string(os.PathSeparator) + "Metropolis" + string(os.PathSeparator) + "Aptetter" + string(os.PathSeparator) + "Erstur" + string(os.PathSeparator) + "solarsystem.staticdata")
 
 }
 
@@ -46,7 +47,7 @@ func UnzipFile() {
 
 	for _, f := range archive.File {
 		filePath := filepath.Join(dst, f.Name)
-		fmt.Println("unzipping file ", filePath)
+		//fmt.Println("unzipping file ", filePath)
 
 		if !strings.HasPrefix(filePath, filepath.Clean(dst)+string(os.PathSeparator)) {
 			fmt.Println("invalid file path")
@@ -87,15 +88,17 @@ func UnzipFile() {
 
 func DetermineModelType(fileName string) {
 	if strings.HasPrefix(fileName, "sde"+string(os.PathSeparator)+"sde"+string(os.PathSeparator)+"bsd"+string(os.PathSeparator)+"invUniqueNames.yaml") {
-		model.LoadUniqueNames("sde" + string(os.PathSeparator) + "sde" + string(os.PathSeparator) + "bsd" + string(os.PathSeparator) + "invUniqueNames.yaml")
+		model.LoadUniqueNames(fileName)
 	} else if fileName == "sde"+string(os.PathSeparator)+"sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.Agents+model.Yaml {
 		fmt.Println("Agents")
 	} else if fileName == "sde"+string(os.PathSeparator)+"sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.AgentsInSpace+model.Yaml {
 		fmt.Println("AgentsInSpace")
 	} else if fileName == "sde"+string(os.PathSeparator)+"sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.Ancestries+model.Yaml {
 		fmt.Println("Ancestries")
-	} else {
-		fmt.Println("fsd file")
+	} else if strings.Contains(fileName, "constellation.staticdata") {
+		fmt.Println(fileName)
+	} else if strings.Contains(fileName, "solarsystem.staticdata") {
+		model.LoadSolarSystem(fileName)
 	}
 }
 
