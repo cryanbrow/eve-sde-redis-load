@@ -17,7 +17,6 @@ func main() {
 
 	//Order concerns
 	/*
-		group_ids goes before invUniqueNames
 		invUniqueNames goes before any solar system/region/constellation
 	*/
 
@@ -28,11 +27,12 @@ func main() {
 	//DownloadFile("sde.zip", "https://eve-static-data-export.s3-eu-west-1.amazonaws.com/tranquility/sde.zip")
 	//DownloadFile("checksum", "https://eve-static-data-export.s3-eu-west-1.amazonaws.com/tranquility/checksum")
 
-	model.LoadStaStations("sde" + string(os.PathSeparator) + "sde" + string(os.PathSeparator) + "bsd" + string(os.PathSeparator) + "staStations.yaml")
-	model.LoadInvNames("sde" + string(os.PathSeparator) + "sde" + string(os.PathSeparator) + "bsd" + string(os.PathSeparator) + "invNames.yaml")
-
+	//model.LoadStaStations("sde" + string(os.PathSeparator) + "sde" + string(os.PathSeparator) + "bsd" + string(os.PathSeparator) + "staStations.yaml")
+	//model.LoadInvNames("sde" + string(os.PathSeparator) + "sde" + string(os.PathSeparator) + "bsd" + string(os.PathSeparator) + "invNames.yaml")
+	//helpers.ReturnDirNames("sde" + string(os.PathSeparator) + "sde" + string(os.PathSeparator) + "fsd" + string(os.PathSeparator) + "universe" + string(os.PathSeparator) + "eve" + string(os.PathSeparator) + "Metropolis" + string(os.PathSeparator))
 	UnzipFile()
-
+	//model.LoadRegion("sde" + string(os.PathSeparator) + "sde" + string(os.PathSeparator) + "fsd" + string(os.PathSeparator) + "universe" + string(os.PathSeparator) + "eve" + string(os.PathSeparator) + "Metropolis" + string(os.PathSeparator) + "region.staticdata")
+	//model.LoadConstellation("sde" + string(os.PathSeparator) + "sde" + string(os.PathSeparator) + "fsd" + string(os.PathSeparator) + "universe" + string(os.PathSeparator) + "eve" + string(os.PathSeparator) + "Metropolis" + string(os.PathSeparator) + "Eugidi" + string(os.PathSeparator) + "constellation.staticdata")
 	//model.LoadSolarSystem("sde" + string(os.PathSeparator) + "sde" + string(os.PathSeparator) + "fsd" + string(os.PathSeparator) + "universe" + string(os.PathSeparator) + "eve" + string(os.PathSeparator) + "Metropolis" + string(os.PathSeparator) + "Aptetter" + string(os.PathSeparator) + "Erstur" + string(os.PathSeparator) + "solarsystem.staticdata")
 
 }
@@ -47,7 +47,7 @@ func UnzipFile() {
 
 	for _, f := range archive.File {
 		filePath := filepath.Join(dst, f.Name)
-		//fmt.Println("unzipping file ", filePath)
+		fmt.Println("unzipping file ", filePath)
 
 		if !strings.HasPrefix(filePath, filepath.Clean(dst)+string(os.PathSeparator)) {
 			fmt.Println("invalid file path")
@@ -87,16 +87,88 @@ func UnzipFile() {
 }
 
 func DetermineModelType(fileName string) {
-	if strings.HasPrefix(fileName, "sde"+string(os.PathSeparator)+"sde"+string(os.PathSeparator)+"bsd"+string(os.PathSeparator)+"invUniqueNames.yaml") {
+	if strings.HasPrefix(fileName, "sde"+string(os.PathSeparator)+"sde"+string(os.PathSeparator)+"bsd"+string(os.PathSeparator)+"invNames.yaml") {
+		model.LoadInvNames(fileName)
+	} else if strings.HasPrefix(fileName, "sde"+string(os.PathSeparator)+"sde"+string(os.PathSeparator)+"bsd"+string(os.PathSeparator)+"invUniqueNames.yaml") {
 		model.LoadUniqueNames(fileName)
+	} else if strings.HasPrefix(fileName, "sde"+string(os.PathSeparator)+"sde"+string(os.PathSeparator)+"bsd"+string(os.PathSeparator)+"staStations.yaml") {
+		model.LoadStaStations(fileName)
 	} else if fileName == "sde"+string(os.PathSeparator)+"sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.Agents+model.Yaml {
-		fmt.Println("Agents")
+		model.LoadRedisAgents(fileName)
 	} else if fileName == "sde"+string(os.PathSeparator)+"sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.AgentsInSpace+model.Yaml {
-		fmt.Println("AgentsInSpace")
+		model.LoadRedisAgentsInSpace(fileName)
 	} else if fileName == "sde"+string(os.PathSeparator)+"sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.Ancestries+model.Yaml {
-		fmt.Println("Ancestries")
+		model.LoadRedisAncestries(fileName)
+	} else if fileName == "sde"+string(os.PathSeparator)+"sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.Bloodlines+model.Yaml {
+		model.LoadRedisBloodlines(fileName)
+	} else if fileName == "sde"+string(os.PathSeparator)+"sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.Blueprints+model.Yaml {
+		model.LoadRedisBlueprints(fileName)
+	} else if fileName == "sde"+string(os.PathSeparator)+"sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.CategoryIDs+model.Yaml {
+		model.LoadRedisCategoryIDs(fileName)
+	} else if fileName == "sde"+string(os.PathSeparator)+"sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.Certificates+model.Yaml {
+		model.LoadRedisCertificates(fileName)
+	} else if fileName == "sde"+string(os.PathSeparator)+"sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.CharacterAttributes+model.Yaml {
+		model.LoadRedisCharacterAttributes(fileName)
+	} else if fileName == "sde"+string(os.PathSeparator)+"sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.ContrabandTypes+model.Yaml {
+		model.LoadRediscontrabandTypes(fileName)
+	} else if fileName == "sde"+string(os.PathSeparator)+"sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.ControlTowerResources+model.Yaml {
+		model.LoadRedisControlTowerAttributes(fileName)
+	} else if fileName == "sde"+string(os.PathSeparator)+"sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.CorporationActivities+model.Yaml {
+		model.LoadRedisCorporationActivities(fileName)
+	} else if fileName == "sde"+string(os.PathSeparator)+"sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.DogmaAttributeCategories+model.Yaml {
+		model.LoadRedisDogmaAttributeCategories(fileName)
+	} else if fileName == "sde"+string(os.PathSeparator)+"sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.DogmaAttributes+model.Yaml {
+		model.LoadRedisDogmaAttributes(fileName)
+	} else if fileName == "sde"+string(os.PathSeparator)+"sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.DogmaEffects+model.Yaml {
+		model.LoadRedissdeDogmaEffects(fileName)
+	} else if fileName == "sde"+string(os.PathSeparator)+"sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.Factions+model.Yaml {
+		model.LoadRedisFactions(fileName)
+	} else if fileName == "sde"+string(os.PathSeparator)+"sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.GraphicIDs+model.Yaml {
+		model.LoadRedisGraphicIDs(fileName)
+	} else if fileName == "sde"+string(os.PathSeparator)+"sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.GroupIDs+model.Yaml {
+		model.LoadRedisGroupIDs(fileName)
+	} else if fileName == "sde"+string(os.PathSeparator)+"sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.IconIDs+model.Yaml {
+		model.LoadRedisIconIDS(fileName)
+	} else if fileName == "sde"+string(os.PathSeparator)+"sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.Landmarks+model.Yaml {
+		model.LoadLandmarks(fileName)
+	} else if fileName == "sde"+string(os.PathSeparator)+"sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.MarketGroups+model.Yaml {
+		model.LoadMarketGroups(fileName)
+	} else if fileName == "sde"+string(os.PathSeparator)+"sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.MetaGroups+model.Yaml {
+		model.LoadMetaGroups(fileName)
+	} else if fileName == "sde"+string(os.PathSeparator)+"sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.NpcCorporationDivisions+model.Yaml {
+		model.LoadNPCCorporationDivisions(fileName)
+	} else if fileName == "sde"+string(os.PathSeparator)+"sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.NpcCorporations+model.Yaml {
+		model.LoadNPCCorporations(fileName)
+	} else if fileName == "sde"+string(os.PathSeparator)+"sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.PlanetSchematics+model.Yaml {
+		model.LoadPlanetSchematics(fileName)
+	} else if fileName == "sde"+string(os.PathSeparator)+"sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.Races+model.Yaml {
+		model.LoadRaces(fileName)
+	} else if fileName == "sde"+string(os.PathSeparator)+"sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.ResearchAgents+model.Yaml {
+		model.LoadResearchAgents(fileName)
+	} else if fileName == "sde"+string(os.PathSeparator)+"sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.SkinLicenses+model.Yaml {
+		model.LoadSkinLicenses(fileName)
+	} else if fileName == "sde"+string(os.PathSeparator)+"sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.SkinMaterials+model.Yaml {
+		model.LoadSkinMaterials(fileName)
+	} else if fileName == "sde"+string(os.PathSeparator)+"sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.Skins+model.Yaml {
+		model.LoadSkins(fileName)
+	} else if fileName == "sde"+string(os.PathSeparator)+"sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.StationOperations+model.Yaml {
+		model.LoadStationOperations(fileName)
+	} else if fileName == "sde"+string(os.PathSeparator)+"sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.StationServices+model.Yaml {
+		model.LoadStationServices(fileName)
+	} else if fileName == "sde"+string(os.PathSeparator)+"sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.TournamentRuleSets+model.Yaml {
+		//TODO not implemented
+	} else if fileName == "sde"+string(os.PathSeparator)+"sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.TranslationLanguages+model.Yaml {
+		//TODO not implemented
+	} else if fileName == "sde"+string(os.PathSeparator)+"sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.TypeDogma+model.Yaml {
+		model.LoadTypeDogmas(fileName)
+	} else if fileName == "sde"+string(os.PathSeparator)+"sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.TypeIDs+model.Yaml {
+		model.LoadTypeIDs(fileName)
+	} else if fileName == "sde"+string(os.PathSeparator)+"sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.TypeMaterials+model.Yaml {
+		model.LoadTypeMaterials(fileName)
 	} else if strings.Contains(fileName, "constellation.staticdata") {
 		fmt.Println(fileName)
+	} else if strings.Contains(fileName, "solarsystem.staticdata") {
+		model.LoadSolarSystem(fileName)
 	} else if strings.Contains(fileName, "solarsystem.staticdata") {
 		model.LoadSolarSystem(fileName)
 	}

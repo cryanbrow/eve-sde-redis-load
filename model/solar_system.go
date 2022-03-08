@@ -289,7 +289,7 @@ func LoadSolarSystem(path string) {
 	sdeSolarSystem.ConstellationID = ids[determineConstallationNameFromFilePath(path)].ItemID
 
 	sdeSolarSystem.RegionID = ids[determineRegionNameFromFilePath(path)].ItemID
-	fmt.Println(sdeSolarSystem.Name)
+	//fmt.Println(sdeSolarSystem.Name)
 
 }
 
@@ -351,8 +351,5 @@ func determineConstallationNameFromFilePath(path string) string {
 
 func determineRegionNameFromFilePath(path string) string {
 	values := strings.Split(path, string(os.PathSeparator))
-	if len(values) == 9 {
-		return values[5]
-	}
-	return ""
+	return values[5]
 }

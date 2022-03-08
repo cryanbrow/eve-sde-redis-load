@@ -8,7 +8,7 @@ var (
 
 func ConfigureCaching() {
 	Rdb = redis.NewClient(&redis.Options{
-		Addr:     "192.168.0.201:30893",
+		Addr:     "localhost:6379",
 		Username: "",
 		Password: "",
 		DB:       1, // use DB 1

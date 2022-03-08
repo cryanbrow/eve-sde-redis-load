@@ -51,7 +51,7 @@ func LoadStaStations(path string) {
 
 	for _, element := range sdeStaStations {
 		staStations[element.StationID] = element
-		if element.StationID == 60015163 {
+		if element.StationID == 9999999999999 {
 			singleStaStationJSON, _ := json.MarshalIndent(element, "", "  ")
 			singleStaStationJSONString := string(singleStaStationJSON[:])
 
