@@ -52,9 +52,6 @@ func LoadRedisCharacterAttributes(path string) {
 		singleCharacterAttribute.ID = k
 		sdeCharacterAttributesJSON, _ := json.Marshal(singleCharacterAttribute)
 		redisKey := "characterAttribute:" + strconv.Itoa(k)
-		status := data.Rdb.Set(context.Background(), redisKey, sdeCharacterAttributesJSON, 0)
-		statusText, _ := status.Result()
-		fmt.Printf("status text: %s \n", statusText)
-		fmt.Println(string(sdeCharacterAttributesJSON))
+		data.Rdb.Set(context.Background(), redisKey, sdeCharacterAttributesJSON, 0)
 	}
 }

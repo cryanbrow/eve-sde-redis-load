@@ -1,10 +1,14 @@
 package model
 
 import (
+	"context"
+	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
+	"strconv"
 
+	"github.com/cryanbrow/eve-sde-redis-load/data"
 	"gopkg.in/yaml.v3"
 )
 
@@ -56,20 +60,14 @@ func LoadUniqueNames(path string) {
 		localID.ItemID = element.ItemID
 		ids[element.ItemName] = localID
 
-		/*nameJSON, _ := json.Marshal(localname)
+		nameJSON, _ := json.Marshal(localname)
 		redisKey := "name:" + strconv.Itoa(element.ItemID)
-		status := data.Rdb.Set(context.Background(), redisKey, nameJSON, 0)
-		statusText, _ := status.Result()
-		fmt.Printf("status text: %s \n", statusText)
-		fmt.Println(string(nameJSON))
+		data.Rdb.Set(context.Background(), redisKey, nameJSON, 0)
 
 		idJSON, _ := json.Marshal(localID)
 		redisKey = "id:" + strconv.Itoa(element.ItemID)
-		status = data.Rdb.Set(context.Background(), redisKey, idJSON, 0)
-		statusText, _ = status.Result()
-		fmt.Printf("status text: %s \n", statusText)
-		fmt.Println(string(idJSON))
-		*/
+		data.Rdb.Set(context.Background(), redisKey, idJSON, 0)
+
 	}
 
 }

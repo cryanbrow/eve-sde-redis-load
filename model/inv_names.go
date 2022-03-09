@@ -1,10 +1,13 @@
 package model
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path/filepath"
+	"strconv"
 
+	"github.com/cryanbrow/eve-sde-redis-load/data"
 	"gopkg.in/yaml.v3"
 )
 
@@ -39,20 +42,12 @@ func LoadInvNames(path string) {
 
 		invIds[element.ItemName] = element.ItemID
 
-		/*nameJSON, _ := json.Marshal(localname)
-		redisKey := "name:" + strconv.Itoa(element.ItemID)
-		status := data.Rdb.Set(context.Background(), redisKey, nameJSON, 0)
-		statusText, _ := status.Result()
-		fmt.Printf("status text: %s \n", statusText)
-		fmt.Println(string(nameJSON))
+		redisKey := "invName:" + element.ItemName
+		data.Rdb.Set(context.Background(), redisKey, element.ItemID, 0)
 
-		idJSON, _ := json.Marshal(localID)
-		redisKey = "id:" + strconv.Itoa(element.ItemID)
-		status = data.Rdb.Set(context.Background(), redisKey, idJSON, 0)
-		statusText, _ = status.Result()
-		fmt.Printf("status text: %s \n", statusText)
-		fmt.Println(string(idJSON))
-		*/
+		redisKey = "invID:" + strconv.Itoa(element.ItemID)
+		data.Rdb.Set(context.Background(), redisKey, element.ItemName, 0)
+
 	}
 
 }

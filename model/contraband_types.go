@@ -45,9 +45,6 @@ func LoadRediscontrabandTypes(path string) {
 		singleContrabandType.ID = k
 		singleContrabandTypeJSON, _ := json.Marshal(singleContrabandType)
 		redisKey := "contrabandType:" + strconv.Itoa(k)
-		status := data.Rdb.Set(context.Background(), redisKey, singleContrabandTypeJSON, 0)
-		statusText, _ := status.Result()
-		fmt.Printf("status text: %s \n", statusText)
-		fmt.Println(string(singleContrabandTypeJSON))
+		data.Rdb.Set(context.Background(), redisKey, singleContrabandTypeJSON, 0)
 	}
 }

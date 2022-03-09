@@ -59,9 +59,7 @@ func LoadMetaGroups(path string) {
 		singleMetaGroup.ID = k
 		singleMetaGroupJSON, _ := json.Marshal(singleMetaGroup)
 		redisKey := "metaGroup:" + strconv.Itoa(k)
-		status := data.Rdb.Set(context.Background(), redisKey, singleMetaGroupJSON, 0)
-		statusText, _ := status.Result()
-		fmt.Printf("status text: %s \n", statusText)
-		fmt.Println(string(singleMetaGroupJSON))
+		data.Rdb.Set(context.Background(), redisKey, singleMetaGroupJSON, 0)
+
 	}
 }

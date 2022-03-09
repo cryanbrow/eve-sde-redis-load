@@ -43,9 +43,6 @@ func LoadRedisAgentsInSpace(path string) {
 		singleAgent.ID = k
 		singleAgentInSpaceJSON, _ := json.Marshal(singleAgent)
 		redisKey := "agentInSpace:" + strconv.Itoa(k)
-		status := data.Rdb.Set(context.Background(), redisKey, singleAgentInSpaceJSON, 0)
-		statusText, _ := status.Result()
-		fmt.Printf("status text: %s \n", statusText)
-		fmt.Println(string(singleAgentInSpaceJSON))
+		data.Rdb.Set(context.Background(), redisKey, singleAgentInSpaceJSON, 0)
 	}
 }

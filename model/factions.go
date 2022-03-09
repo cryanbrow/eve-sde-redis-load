@@ -73,9 +73,6 @@ func LoadRedisFactions(path string) {
 		singleFaction.ID = k
 		singleFactionJSON, _ := json.Marshal(singleFaction)
 		redisKey := "faction:" + strconv.Itoa(k)
-		status := data.Rdb.Set(context.Background(), redisKey, singleFactionJSON, 0)
-		statusText, _ := status.Result()
-		fmt.Printf("status text: %s \n", statusText)
-		fmt.Println(string(singleFactionJSON))
+		data.Rdb.Set(context.Background(), redisKey, singleFactionJSON, 0)
 	}
 }

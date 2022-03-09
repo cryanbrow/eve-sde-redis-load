@@ -85,9 +85,7 @@ func LoadRedissdeDogmaEffects(path string) {
 		singleDogmaEffect.ID = k
 		singleDogmaEffectJSON, _ := json.Marshal(singleDogmaEffect)
 		redisKey := "dogmaEffect:" + strconv.Itoa(k)
-		status := data.Rdb.Set(context.Background(), redisKey, singleDogmaEffectJSON, 0)
-		statusText, _ := status.Result()
-		fmt.Printf("status text: %s \n", statusText)
-		fmt.Println(string(singleDogmaEffectJSON))
+		data.Rdb.Set(context.Background(), redisKey, singleDogmaEffectJSON, 0)
+
 	}
 }

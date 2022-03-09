@@ -54,9 +54,7 @@ func LoadRedisGroupIDs(path string) {
 		singleGroupID.ID = k
 		singleGroupIDJSON, _ := json.Marshal(singleGroupID)
 		redisKey := "groupID:" + strconv.Itoa(k)
-		status := data.Rdb.Set(context.Background(), redisKey, singleGroupIDJSON, 0)
-		statusText, _ := status.Result()
-		fmt.Printf("status text: %s \n", statusText)
-		fmt.Println(string(singleGroupIDJSON))
+		data.Rdb.Set(context.Background(), redisKey, singleGroupIDJSON, 0)
+
 	}
 }

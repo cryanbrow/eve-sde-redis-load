@@ -48,9 +48,7 @@ func LoadStationServices(path string) {
 		singleStationService.ID = k
 		singleStationServiceJSON, _ := json.Marshal(singleStationService)
 		redisKey := "stationService:" + strconv.Itoa(k)
-		status := data.Rdb.Set(context.Background(), redisKey, singleStationServiceJSON, 0)
-		statusText, _ := status.Result()
-		fmt.Printf("status text: %s \n", statusText)
-		fmt.Println(string(singleStationServiceJSON))
+		data.Rdb.Set(context.Background(), redisKey, singleStationServiceJSON, 0)
+
 	}
 }

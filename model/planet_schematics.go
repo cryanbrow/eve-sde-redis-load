@@ -56,9 +56,7 @@ func LoadPlanetSchematics(path string) {
 		singlePlanetSchematic.ID = k
 		singlePlanetSchematicJSON, _ := json.Marshal(singlePlanetSchematic)
 		redisKey := "planetSchematic:" + strconv.Itoa(k)
-		status := data.Rdb.Set(context.Background(), redisKey, singlePlanetSchematicJSON, 0)
-		statusText, _ := status.Result()
-		fmt.Printf("status text: %s \n", statusText)
-		fmt.Println(string(singlePlanetSchematicJSON))
+		data.Rdb.Set(context.Background(), redisKey, singlePlanetSchematicJSON, 0)
+
 	}
 }

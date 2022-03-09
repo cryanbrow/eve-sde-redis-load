@@ -47,9 +47,7 @@ func LoadSkins(path string) {
 		singleSkin.ID = k
 		singleSkinJSON, _ := json.Marshal(singleSkin)
 		redisKey := "skin:" + strconv.Itoa(k)
-		status := data.Rdb.Set(context.Background(), redisKey, singleSkinJSON, 0)
-		statusText, _ := status.Result()
-		fmt.Printf("status text: %s \n", statusText)
-		fmt.Println(string(singleSkinJSON))
+		data.Rdb.Set(context.Background(), redisKey, singleSkinJSON, 0)
+
 	}
 }

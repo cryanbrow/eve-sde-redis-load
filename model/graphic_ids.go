@@ -79,9 +79,7 @@ func LoadRedisGraphicIDs(path string) {
 		singleGraphicID.ID = k
 		singleGraphicIDJSON, _ := json.Marshal(singleGraphicID)
 		redisKey := "graphicID:" + strconv.Itoa(k)
-		status := data.Rdb.Set(context.Background(), redisKey, singleGraphicIDJSON, 0)
-		statusText, _ := status.Result()
-		fmt.Printf("status text: %s \n", statusText)
-		fmt.Println(string(singleGraphicIDJSON))
+		data.Rdb.Set(context.Background(), redisKey, singleGraphicIDJSON, 0)
+
 	}
 }

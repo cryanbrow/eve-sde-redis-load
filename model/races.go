@@ -60,9 +60,7 @@ func LoadRaces(path string) {
 		singleRace.ID = k
 		singleRaceJSON, _ := json.Marshal(singleRace)
 		redisKey := "race:" + strconv.Itoa(k)
-		status := data.Rdb.Set(context.Background(), redisKey, singleRaceJSON, 0)
-		statusText, _ := status.Result()
-		fmt.Printf("status text: %s \n", statusText)
-		fmt.Println(string(singleRaceJSON))
+		data.Rdb.Set(context.Background(), redisKey, singleRaceJSON, 0)
+
 	}
 }

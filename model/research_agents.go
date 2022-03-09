@@ -42,9 +42,7 @@ func LoadResearchAgents(path string) {
 		singleResearchAgent.ID = k
 		singleResearchAgentJSON, _ := json.Marshal(singleResearchAgent)
 		redisKey := "researchAgent:" + strconv.Itoa(k)
-		status := data.Rdb.Set(context.Background(), redisKey, singleResearchAgentJSON, 0)
-		statusText, _ := status.Result()
-		fmt.Printf("status text: %s \n", statusText)
-		fmt.Println(string(singleResearchAgentJSON))
+		data.Rdb.Set(context.Background(), redisKey, singleResearchAgentJSON, 0)
+
 	}
 }

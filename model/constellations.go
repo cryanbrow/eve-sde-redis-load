@@ -1,7 +1,6 @@
 package model
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -65,9 +64,4 @@ func LoadConstellation(path string) {
 	sdeConstellation.RegionID = ids[determineRegionNameFromFilePath(path)].ItemID
 
 	sdeConstellation.Name = names[sdeConstellation.ConstellationID].ItemName
-
-	singleConstellationJSON, _ := json.MarshalIndent(sdeConstellation, "", "  ")
-	singleConstellationJSONString := string(singleConstellationJSON[:])
-	fmt.Println(singleConstellationJSONString)
-
 }

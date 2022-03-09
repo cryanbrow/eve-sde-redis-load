@@ -67,9 +67,7 @@ func LoadStationOperations(path string) {
 		singleStationOperation.ID = k
 		singleStationOperationJSON, _ := json.Marshal(singleStationOperation)
 		redisKey := "stationOperation:" + strconv.Itoa(k)
-		status := data.Rdb.Set(context.Background(), redisKey, singleStationOperationJSON, 0)
-		statusText, _ := status.Result()
-		fmt.Printf("status text: %s \n", statusText)
-		fmt.Println(string(singleStationOperationJSON))
+		data.Rdb.Set(context.Background(), redisKey, singleStationOperationJSON, 0)
+
 	}
 }

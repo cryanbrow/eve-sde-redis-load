@@ -65,9 +65,6 @@ func LoadRedisBloodlines(path string) {
 		singleBloodline.ID = k
 		singleBloodlineJSON, _ := json.Marshal(singleBloodline)
 		redisKey := "agent:" + strconv.Itoa(k)
-		status := data.Rdb.Set(context.Background(), redisKey, singleBloodlineJSON, 0)
-		statusText, _ := status.Result()
-		fmt.Printf("status text: %s \n", statusText)
-		fmt.Println(string(singleBloodlineJSON))
+		data.Rdb.Set(context.Background(), redisKey, singleBloodlineJSON, 0)
 	}
 }

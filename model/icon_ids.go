@@ -41,9 +41,7 @@ func LoadRedisIconIDS(path string) {
 		singleIconID.ID = k
 		singleIconIDJSON, _ := json.Marshal(singleIconID)
 		redisKey := "iconID:" + strconv.Itoa(k)
-		status := data.Rdb.Set(context.Background(), redisKey, singleIconIDJSON, 0)
-		statusText, _ := status.Result()
-		fmt.Printf("status text: %s \n", statusText)
-		fmt.Println(string(singleIconIDJSON))
+		data.Rdb.Set(context.Background(), redisKey, singleIconIDJSON, 0)
+
 	}
 }

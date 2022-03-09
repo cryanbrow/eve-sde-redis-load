@@ -59,9 +59,7 @@ func LoadMarketGroups(path string) {
 		singleMarketGroup.ID = k
 		singleMarketGroupJSON, _ := json.Marshal(singleMarketGroup)
 		redisKey := "marketGroup:" + strconv.Itoa(k)
-		status := data.Rdb.Set(context.Background(), redisKey, singleMarketGroupJSON, 0)
-		statusText, _ := status.Result()
-		fmt.Printf("status text: %s \n", statusText)
-		fmt.Println(string(singleMarketGroupJSON))
+		data.Rdb.Set(context.Background(), redisKey, singleMarketGroupJSON, 0)
+
 	}
 }

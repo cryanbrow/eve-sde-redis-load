@@ -79,9 +79,7 @@ func LoadRedisDogmaAttributes(path string) {
 		singleDogmaAttribute.ID = k
 		singleDogmaAttributeJSON, _ := json.Marshal(singleDogmaAttribute)
 		redisKey := "dogmaAttribute:" + strconv.Itoa(k)
-		status := data.Rdb.Set(context.Background(), redisKey, singleDogmaAttributeJSON, 0)
-		statusText, _ := status.Result()
-		fmt.Printf("status text: %s \n", statusText)
-		fmt.Println(string(singleDogmaAttributeJSON))
+		data.Rdb.Set(context.Background(), redisKey, singleDogmaAttributeJSON, 0)
+
 	}
 }

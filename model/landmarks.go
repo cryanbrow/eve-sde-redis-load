@@ -44,9 +44,7 @@ func LoadLandmarks(path string) {
 		singleLandmark.ID = k
 		singleLandmarkJSON, _ := json.Marshal(singleLandmark)
 		redisKey := "landmark:" + strconv.Itoa(k)
-		status := data.Rdb.Set(context.Background(), redisKey, singleLandmarkJSON, 0)
-		statusText, _ := status.Result()
-		fmt.Printf("status text: %s \n", statusText)
-		fmt.Println(string(singleLandmarkJSON))
+		data.Rdb.Set(context.Background(), redisKey, singleLandmarkJSON, 0)
+
 	}
 }

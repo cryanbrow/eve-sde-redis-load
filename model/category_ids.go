@@ -49,9 +49,6 @@ func LoadRedisCategoryIDs(path string) {
 		singleCategoryID.ID = k
 		sdeCategoryIDsJSON, _ := json.Marshal(singleCategoryID)
 		redisKey := "categoryID:" + strconv.Itoa(k)
-		status := data.Rdb.Set(context.Background(), redisKey, sdeCategoryIDsJSON, 0)
-		statusText, _ := status.Result()
-		fmt.Printf("status text: %s \n", statusText)
-		fmt.Println(string(sdeCategoryIDsJSON))
+		data.Rdb.Set(context.Background(), redisKey, sdeCategoryIDsJSON, 0)
 	}
 }

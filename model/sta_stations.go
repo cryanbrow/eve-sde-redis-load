@@ -1,11 +1,14 @@
 package model
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
+	"strconv"
 
+	"github.com/cryanbrow/eve-sde-redis-load/data"
 	"gopkg.in/yaml.v3"
 )
 
@@ -51,27 +54,11 @@ func LoadStaStations(path string) {
 
 	for _, element := range sdeStaStations {
 		staStations[element.StationID] = element
-		if element.StationID == 9999999999999 {
-			singleStaStationJSON, _ := json.MarshalIndent(element, "", "  ")
-			singleStaStationJSONString := string(singleStaStationJSON[:])
 
-			fmt.Println(singleStaStationJSONString)
-		}
+		staStationJSON, _ := json.Marshal(element)
+		redisKey := "staStation:" + strconv.Itoa(element.StationID)
+		data.Rdb.Set(context.Background(), redisKey, staStationJSON, 0)
 
-		/*nameJSON, _ := json.Marshal(localname)
-		redisKey := "name:" + strconv.Itoa(element.ItemID)
-		status := data.Rdb.Set(context.Background(), redisKey, nameJSON, 0)
-		statusText, _ := status.Result()
-		fmt.Printf("status text: %s \n", statusText)
-		fmt.Println(string(nameJSON))
-
-		idJSON, _ := json.Marshal(localID)
-		redisKey = "id:" + strconv.Itoa(element.ItemID)
-		status = data.Rdb.Set(context.Background(), redisKey, idJSON, 0)
-		statusText, _ = status.Result()
-		fmt.Printf("status text: %s \n", statusText)
-		fmt.Println(string(idJSON))
-		*/
 	}
 
 }

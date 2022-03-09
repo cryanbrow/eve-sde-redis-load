@@ -43,9 +43,7 @@ func LoadTypeMaterials(path string) {
 		singleTypeMaterial.ID = k
 		singleTypeMaterialJSON, _ := json.Marshal(singleTypeMaterial)
 		redisKey := "typeMaterial:" + strconv.Itoa(k)
-		status := data.Rdb.Set(context.Background(), redisKey, singleTypeMaterialJSON, 0)
-		statusText, _ := status.Result()
-		fmt.Printf("status text: %s \n", statusText)
-		fmt.Println(string(singleTypeMaterialJSON))
+		data.Rdb.Set(context.Background(), redisKey, singleTypeMaterialJSON, 0)
+
 	}
 }

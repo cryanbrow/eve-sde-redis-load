@@ -52,9 +52,6 @@ func LoadRedisCertificates(path string) {
 		singleCertificate.ID = k
 		singleCertificateJSON, _ := json.Marshal(singleCertificate)
 		redisKey := "certificate:" + strconv.Itoa(k)
-		status := data.Rdb.Set(context.Background(), redisKey, singleCertificateJSON, 0)
-		statusText, _ := status.Result()
-		fmt.Printf("status text: %s \n", statusText)
-		fmt.Println(string(singleCertificateJSON))
+		data.Rdb.Set(context.Background(), redisKey, singleCertificateJSON, 0)
 	}
 }

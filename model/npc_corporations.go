@@ -92,9 +92,7 @@ func LoadNPCCorporations(path string) {
 		singleNPCCorporation.ID = k
 		singleNPCCorporationJSON, _ := json.Marshal(singleNPCCorporation)
 		redisKey := "npcCorporation:" + strconv.Itoa(k)
-		status := data.Rdb.Set(context.Background(), redisKey, singleNPCCorporationJSON, 0)
-		statusText, _ := status.Result()
-		fmt.Printf("status text: %s \n", statusText)
-		fmt.Println(string(singleNPCCorporationJSON))
+		data.Rdb.Set(context.Background(), redisKey, singleNPCCorporationJSON, 0)
+
 	}
 }
