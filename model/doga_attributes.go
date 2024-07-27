@@ -1,7 +1,6 @@
 package model
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -9,6 +8,7 @@ import (
 	"strconv"
 
 	"github.com/cryanbrow/eve-sde-redis-load/data"
+	"github.com/patrickmn/go-cache"
 	"gopkg.in/yaml.v3"
 )
 
@@ -79,7 +79,6 @@ func LoadRedisDogmaAttributes(path string) {
 		singleDogmaAttribute.ID = k
 		singleDogmaAttributeJSON, _ := json.Marshal(singleDogmaAttribute)
 		redisKey := "dogmaAttribute:" + strconv.Itoa(k)
-		data.Rdb.Set(context.Background(), redisKey, singleDogmaAttributeJSON, 0)
-
+		data.NonExpiringCache.Set(redisKey, singleDogmaAttributeJSON, cache.NoExpiration)
 	}
 }

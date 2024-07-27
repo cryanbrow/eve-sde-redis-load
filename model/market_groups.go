@@ -1,7 +1,6 @@
 package model
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -59,7 +58,6 @@ func LoadMarketGroups(path string) {
 		singleMarketGroup.ID = k
 		singleMarketGroupJSON, _ := json.Marshal(singleMarketGroup)
 		redisKey := "marketGroup:" + strconv.Itoa(k)
-		data.Rdb.Set(context.Background(), redisKey, singleMarketGroupJSON, 0)
-
+		data.NonExpiringCache.Set(redisKey, singleMarketGroupJSON, 0)
 	}
 }

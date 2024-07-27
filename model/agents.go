@@ -1,7 +1,6 @@
 package model
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -9,6 +8,7 @@ import (
 	"strconv"
 
 	"github.com/cryanbrow/eve-sde-redis-load/data"
+	"github.com/patrickmn/go-cache"
 	"gopkg.in/yaml.v3"
 )
 
@@ -45,6 +45,6 @@ func LoadRedisAgents(path string) {
 		singleAgent.ID = k
 		singleAgentJSON, _ := json.Marshal(singleAgent)
 		redisKey := "agent:" + strconv.Itoa(k)
-		data.Rdb.Set(context.Background(), redisKey, singleAgentJSON, 0)
+		data.NonExpiringCache.Set(redisKey, singleAgentJSON, cache.NoExpiration)
 	}
 }

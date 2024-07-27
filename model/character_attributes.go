@@ -1,7 +1,6 @@
 package model
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -9,6 +8,7 @@ import (
 	"strconv"
 
 	"github.com/cryanbrow/eve-sde-redis-load/data"
+	"github.com/patrickmn/go-cache"
 	"gopkg.in/yaml.v3"
 )
 
@@ -52,6 +52,6 @@ func LoadRedisCharacterAttributes(path string) {
 		singleCharacterAttribute.ID = k
 		sdeCharacterAttributesJSON, _ := json.Marshal(singleCharacterAttribute)
 		redisKey := "characterAttribute:" + strconv.Itoa(k)
-		data.Rdb.Set(context.Background(), redisKey, sdeCharacterAttributesJSON, 0)
+		data.NonExpiringCache.Set(redisKey, sdeCharacterAttributesJSON, cache.NoExpiration)
 	}
 }

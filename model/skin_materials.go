@@ -1,7 +1,6 @@
 package model
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -42,7 +41,6 @@ func LoadSkinMaterials(path string) {
 		singleSkinMaterial.ID = k
 		singleSkinMaterialJSON, _ := json.Marshal(singleSkinMaterial)
 		redisKey := "skinMaterial:" + strconv.Itoa(k)
-		data.Rdb.Set(context.Background(), redisKey, singleSkinMaterialJSON, 0)
-
+		data.NonExpiringCache.Set(redisKey, singleSkinMaterialJSON, 0)
 	}
 }

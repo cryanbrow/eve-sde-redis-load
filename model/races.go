@@ -1,7 +1,6 @@
 package model
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -60,7 +59,6 @@ func LoadRaces(path string) {
 		singleRace.ID = k
 		singleRaceJSON, _ := json.Marshal(singleRace)
 		redisKey := "race:" + strconv.Itoa(k)
-		data.Rdb.Set(context.Background(), redisKey, singleRaceJSON, 0)
-
+		data.NonExpiringCache.Set(redisKey, singleRaceJSON, 0)
 	}
 }

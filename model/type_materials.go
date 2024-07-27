@@ -1,7 +1,6 @@
 package model
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -43,7 +42,6 @@ func LoadTypeMaterials(path string) {
 		singleTypeMaterial.ID = k
 		singleTypeMaterialJSON, _ := json.Marshal(singleTypeMaterial)
 		redisKey := "typeMaterial:" + strconv.Itoa(k)
-		data.Rdb.Set(context.Background(), redisKey, singleTypeMaterialJSON, 0)
-
+		data.NonExpiringCache.Set(redisKey, singleTypeMaterialJSON, 0)
 	}
 }

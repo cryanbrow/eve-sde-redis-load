@@ -1,7 +1,6 @@
 package model
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -73,6 +72,6 @@ func LoadRedisFactions(path string) {
 		singleFaction.ID = k
 		singleFactionJSON, _ := json.Marshal(singleFaction)
 		redisKey := "faction:" + strconv.Itoa(k)
-		data.Rdb.Set(context.Background(), redisKey, singleFactionJSON, 0)
+		data.NonExpiringCache.Set(redisKey, singleFactionJSON, 0)
 	}
 }

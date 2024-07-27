@@ -1,7 +1,6 @@
 package model
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -9,6 +8,7 @@ import (
 	"strconv"
 
 	"github.com/cryanbrow/eve-sde-redis-load/data"
+	"github.com/patrickmn/go-cache"
 	"gopkg.in/yaml.v3"
 )
 
@@ -48,7 +48,6 @@ func LoadRedisControlTowerAttributes(path string) {
 		singleControlTowerAttribute.ID = k
 		sdeControlTowerAttributesJSON, _ := json.Marshal(singleControlTowerAttribute)
 		redisKey := "controlTowerAttribute:" + strconv.Itoa(k)
-		data.Rdb.Set(context.Background(), redisKey, sdeControlTowerAttributesJSON, 0)
-
+		data.NonExpiringCache.Set(redisKey, sdeControlTowerAttributesJSON, cache.NoExpiration)
 	}
 }

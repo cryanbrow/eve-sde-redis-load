@@ -1,7 +1,6 @@
 package model
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -47,7 +46,6 @@ func LoadTypeDogmas(path string) {
 		singletypeDogma.ID = k
 		singletypeDogmaJSON, _ := json.Marshal(singletypeDogma)
 		redisKey := "typeDogma:" + strconv.Itoa(k)
-		data.Rdb.Set(context.Background(), redisKey, singletypeDogmaJSON, 0)
-
+		data.NonExpiringCache.Set(redisKey, singletypeDogmaJSON, 0)
 	}
 }

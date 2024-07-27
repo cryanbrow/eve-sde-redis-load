@@ -1,7 +1,6 @@
 package model
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -42,7 +41,6 @@ func LoadSkinLicenses(path string) {
 		singleSkinLicense.ID = k
 		singleSkinLicenseJSON, _ := json.Marshal(singleSkinLicense)
 		redisKey := "skinLicense:" + strconv.Itoa(k)
-		data.Rdb.Set(context.Background(), redisKey, singleSkinLicenseJSON, 0)
-
+		data.NonExpiringCache.Set(redisKey, singleSkinLicenseJSON, 0)
 	}
 }

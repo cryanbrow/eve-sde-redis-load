@@ -1,7 +1,6 @@
 package model
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -59,7 +58,6 @@ func LoadMetaGroups(path string) {
 		singleMetaGroup.ID = k
 		singleMetaGroupJSON, _ := json.Marshal(singleMetaGroup)
 		redisKey := "metaGroup:" + strconv.Itoa(k)
-		data.Rdb.Set(context.Background(), redisKey, singleMetaGroupJSON, 0)
-
+		data.NonExpiringCache.Set(redisKey, singleMetaGroupJSON, 0)
 	}
 }

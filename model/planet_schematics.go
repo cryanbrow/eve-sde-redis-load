@@ -1,7 +1,6 @@
 package model
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -56,7 +55,6 @@ func LoadPlanetSchematics(path string) {
 		singlePlanetSchematic.ID = k
 		singlePlanetSchematicJSON, _ := json.Marshal(singlePlanetSchematic)
 		redisKey := "planetSchematic:" + strconv.Itoa(k)
-		data.Rdb.Set(context.Background(), redisKey, singlePlanetSchematicJSON, 0)
-
+		data.NonExpiringCache.Set(redisKey, singlePlanetSchematicJSON, 0)
 	}
 }

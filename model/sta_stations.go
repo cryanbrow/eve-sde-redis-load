@@ -1,8 +1,6 @@
 package model
 
 import (
-	"context"
-	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -12,10 +10,10 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-var sdeStaStations []staStation
-var staStations = make(map[int]staStation)
+var sdeStaStations []StaStation
+var staStations = make(map[int]StaStation)
 
-type staStation struct {
+type StaStation struct {
 	ConstellationID          int     `yaml:"constellationID" json:"constellation_id"`
 	CorporationID            int     `yaml:"corporationID" json:"corporation_id"`
 	DockingCostPerVolume     int     `yaml:"dockingCostPerVolume" json:"docking_cost_per_volume"`
@@ -55,10 +53,8 @@ func LoadStaStations(path string) {
 	for _, element := range sdeStaStations {
 		staStations[element.StationID] = element
 
-		staStationJSON, _ := json.Marshal(element)
 		redisKey := "staStation:" + strconv.Itoa(element.StationID)
-		data.Rdb.Set(context.Background(), redisKey, staStationJSON, 0)
-
+		data.NonExpiringCache.Set(redisKey, element, 0)
 	}
 
 }

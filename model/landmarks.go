@@ -1,7 +1,6 @@
 package model
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -44,7 +43,6 @@ func LoadLandmarks(path string) {
 		singleLandmark.ID = k
 		singleLandmarkJSON, _ := json.Marshal(singleLandmark)
 		redisKey := "landmark:" + strconv.Itoa(k)
-		data.Rdb.Set(context.Background(), redisKey, singleLandmarkJSON, 0)
-
+		data.NonExpiringCache.Set(redisKey, singleLandmarkJSON, 0)
 	}
 }

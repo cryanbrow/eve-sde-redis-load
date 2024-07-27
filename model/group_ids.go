@@ -1,7 +1,6 @@
 package model
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -54,7 +53,6 @@ func LoadRedisGroupIDs(path string) {
 		singleGroupID.ID = k
 		singleGroupIDJSON, _ := json.Marshal(singleGroupID)
 		redisKey := "groupID:" + strconv.Itoa(k)
-		data.Rdb.Set(context.Background(), redisKey, singleGroupIDJSON, 0)
-
+		data.NonExpiringCache.Set(redisKey, singleGroupIDJSON, 0)
 	}
 }

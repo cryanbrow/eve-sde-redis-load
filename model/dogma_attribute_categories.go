@@ -1,7 +1,6 @@
 package model
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -41,6 +40,6 @@ func LoadRedisDogmaAttributeCategories(path string) {
 		singleDogmaAttributeCategory.ID = k
 		singleDogmaAttributeCategoryJSON, _ := json.Marshal(singleDogmaAttributeCategory)
 		redisKey := "dogmaAttributeCategory:" + strconv.Itoa(k)
-		data.Rdb.Set(context.Background(), redisKey, singleDogmaAttributeCategoryJSON, 0)
+		data.NonExpiringCache.Set(redisKey, singleDogmaAttributeCategoryJSON, 0)
 	}
 }

@@ -1,7 +1,6 @@
 package model
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -9,6 +8,7 @@ import (
 	"strconv"
 
 	"github.com/cryanbrow/eve-sde-redis-load/data"
+	"github.com/patrickmn/go-cache"
 	"gopkg.in/yaml.v3"
 )
 
@@ -52,6 +52,6 @@ func LoadRedisCertificates(path string) {
 		singleCertificate.ID = k
 		singleCertificateJSON, _ := json.Marshal(singleCertificate)
 		redisKey := "certificate:" + strconv.Itoa(k)
-		data.Rdb.Set(context.Background(), redisKey, singleCertificateJSON, 0)
+		data.NonExpiringCache.Set(redisKey, singleCertificateJSON, cache.NoExpiration)
 	}
 }

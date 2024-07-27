@@ -1,7 +1,6 @@
 package model
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -41,7 +40,6 @@ func LoadRedisIconIDS(path string) {
 		singleIconID.ID = k
 		singleIconIDJSON, _ := json.Marshal(singleIconID)
 		redisKey := "iconID:" + strconv.Itoa(k)
-		data.Rdb.Set(context.Background(), redisKey, singleIconIDJSON, 0)
-
+		data.NonExpiringCache.Set(redisKey, singleIconIDJSON, 0)
 	}
 }

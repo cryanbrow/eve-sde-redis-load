@@ -1,7 +1,6 @@
 package model
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -59,7 +58,6 @@ func LoadNPCCorporationDivisions(path string) {
 		singleNPCCorporationDivision.ID = k
 		singleNPCCorporationDivisionJSON, _ := json.Marshal(singleNPCCorporationDivision)
 		redisKey := "npcCorporationDivision:" + strconv.Itoa(k)
-		data.Rdb.Set(context.Background(), redisKey, singleNPCCorporationDivisionJSON, 0)
-
+		data.NonExpiringCache.Set(redisKey, singleNPCCorporationDivisionJSON, 0)
 	}
 }

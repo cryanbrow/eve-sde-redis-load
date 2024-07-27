@@ -1,7 +1,6 @@
 package model
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -79,7 +78,6 @@ func LoadRedisGraphicIDs(path string) {
 		singleGraphicID.ID = k
 		singleGraphicIDJSON, _ := json.Marshal(singleGraphicID)
 		redisKey := "graphicID:" + strconv.Itoa(k)
-		data.Rdb.Set(context.Background(), redisKey, singleGraphicIDJSON, 0)
-
+		data.NonExpiringCache.Set(redisKey, singleGraphicIDJSON, 0)
 	}
 }

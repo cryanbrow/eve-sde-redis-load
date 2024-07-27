@@ -2,6 +2,8 @@ package main
 
 import (
 	"archive/zip"
+	"crypto/md5"
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -20,21 +22,18 @@ func main() {
 		invUniqueNames goes before any solar system/region/constellation
 	*/
 
-	data.ConfigureCaching()
-	// https://eve-static-data-export.s3-eu-west-1.amazonaws.com/tranquility/sde.zip
-	// https://eve-static-data-export.s3-eu-west-1.amazonaws.com/tranquility/checksum
-
-	DownloadFile("sde.zip", "https://eve-static-data-export.s3-eu-west-1.amazonaws.com/tranquility/sde.zip")
+	data.ConfigureInMemoryCaching()
+	//DownloadFile("sde.zip", "https://eve-static-data-export.s3-eu-west-1.amazonaws.com/tranquility/sde.zip")
 	//DownloadFile("checksum", "https://eve-static-data-export.s3-eu-west-1.amazonaws.com/tranquility/checksum")
-
-	//model.LoadStaStations("sde" + string(os.PathSeparator) + "sde" + string(os.PathSeparator) + "bsd" + string(os.PathSeparator) + "staStations.yaml")
-	//model.LoadInvNames("sde" + string(os.PathSeparator) + "sde" + string(os.PathSeparator) + "bsd" + string(os.PathSeparator) + "invNames.yaml")
-	//helpers.ReturnDirNames("sde" + string(os.PathSeparator) + "sde" + string(os.PathSeparator) + "fsd" + string(os.PathSeparator) + "universe" + string(os.PathSeparator) + "eve" + string(os.PathSeparator) + "Metropolis" + string(os.PathSeparator))
 	UnzipFile()
-	//model.LoadRegion("sde" + string(os.PathSeparator) + "sde" + string(os.PathSeparator) + "fsd" + string(os.PathSeparator) + "universe" + string(os.PathSeparator) + "eve" + string(os.PathSeparator) + "Metropolis" + string(os.PathSeparator) + "region.staticdata")
-	//model.LoadConstellation("sde" + string(os.PathSeparator) + "sde" + string(os.PathSeparator) + "fsd" + string(os.PathSeparator) + "universe" + string(os.PathSeparator) + "eve" + string(os.PathSeparator) + "Metropolis" + string(os.PathSeparator) + "Eugidi" + string(os.PathSeparator) + "constellation.staticdata")
-	//model.LoadSolarSystem("sde" + string(os.PathSeparator) + "sde" + string(os.PathSeparator) + "fsd" + string(os.PathSeparator) + "universe" + string(os.PathSeparator) + "eve" + string(os.PathSeparator) + "Metropolis" + string(os.PathSeparator) + "Aptetter" + string(os.PathSeparator) + "Erstur" + string(os.PathSeparator) + "solarsystem.staticdata")
-
+	println("Number of keys in cache: ", data.NonExpiringCache.ItemCount())
+	value, found := data.NonExpiringCache.Get("staStation:60003760")
+	println("Value found: ", found)
+	if found {
+		prettyPrintJSON(value)
+	} else {
+		fmt.Println("Value not found")
+	}
 }
 
 func UnzipFile() {
@@ -45,9 +44,15 @@ func UnzipFile() {
 	}
 	defer archive.Close()
 
+	fmt.Println("File count: ", len(archive.File))
+	counter := 0
 	for _, f := range archive.File {
+		if counter%1000 == 1 {
+			fmt.Println("Current File count: ", counter)
+		}
+		counter++
 		filePath := filepath.Join(dst, f.Name)
-		fmt.Println("unzipping file ", filePath)
+		//fmt.Println("unzipping file ", filePath)
 
 		if !strings.HasPrefix(filePath, filepath.Clean(dst)+string(os.PathSeparator)) {
 			fmt.Println("invalid file path")
@@ -87,89 +92,87 @@ func UnzipFile() {
 }
 
 func DetermineModelType(fileName string) {
-	if strings.HasPrefix(fileName, "sde"+string(os.PathSeparator)+"sde"+string(os.PathSeparator)+"bsd"+string(os.PathSeparator)+"invNames.yaml") {
+	if strings.HasPrefix(fileName, "sde"+string(os.PathSeparator)+"bsd"+string(os.PathSeparator)+"invNames.yaml") {
 		model.LoadInvNames(fileName)
-	} else if strings.HasPrefix(fileName, "sde"+string(os.PathSeparator)+"sde"+string(os.PathSeparator)+"bsd"+string(os.PathSeparator)+"invUniqueNames.yaml") {
+	} else if strings.HasPrefix(fileName, "sde"+string(os.PathSeparator)+"bsd"+string(os.PathSeparator)+"invUniqueNames.yaml") {
 		model.LoadUniqueNames(fileName)
-	} else if strings.HasPrefix(fileName, "sde"+string(os.PathSeparator)+"sde"+string(os.PathSeparator)+"bsd"+string(os.PathSeparator)+"staStations.yaml") {
+	} else if strings.HasPrefix(fileName, "sde"+string(os.PathSeparator)+"bsd"+string(os.PathSeparator)+"staStations.yaml") {
 		model.LoadStaStations(fileName)
-	} else if fileName == "sde"+string(os.PathSeparator)+"sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.Agents+model.Yaml {
+	} else if fileName == "sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.Agents+model.Yaml {
 		model.LoadRedisAgents(fileName)
-	} else if fileName == "sde"+string(os.PathSeparator)+"sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.AgentsInSpace+model.Yaml {
+	} else if fileName == "sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.AgentsInSpace+model.Yaml {
 		model.LoadRedisAgentsInSpace(fileName)
-	} else if fileName == "sde"+string(os.PathSeparator)+"sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.Ancestries+model.Yaml {
+	} else if fileName == "sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.Ancestries+model.Yaml {
 		model.LoadRedisAncestries(fileName)
-	} else if fileName == "sde"+string(os.PathSeparator)+"sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.Bloodlines+model.Yaml {
+	} else if fileName == "sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.Bloodlines+model.Yaml {
 		model.LoadRedisBloodlines(fileName)
-	} else if fileName == "sde"+string(os.PathSeparator)+"sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.Blueprints+model.Yaml {
+	} else if fileName == "sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.Blueprints+model.Yaml {
 		model.LoadRedisBlueprints(fileName)
-	} else if fileName == "sde"+string(os.PathSeparator)+"sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.CategoryIDs+model.Yaml {
+	} else if fileName == "sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.CategoryIDs+model.Yaml {
 		model.LoadRedisCategoryIDs(fileName)
-	} else if fileName == "sde"+string(os.PathSeparator)+"sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.Certificates+model.Yaml {
+	} else if fileName == "sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.Certificates+model.Yaml {
 		model.LoadRedisCertificates(fileName)
-	} else if fileName == "sde"+string(os.PathSeparator)+"sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.CharacterAttributes+model.Yaml {
+	} else if fileName == "sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.CharacterAttributes+model.Yaml {
 		model.LoadRedisCharacterAttributes(fileName)
-	} else if fileName == "sde"+string(os.PathSeparator)+"sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.ContrabandTypes+model.Yaml {
+	} else if fileName == "sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.ContrabandTypes+model.Yaml {
 		model.LoadRediscontrabandTypes(fileName)
-	} else if fileName == "sde"+string(os.PathSeparator)+"sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.ControlTowerResources+model.Yaml {
+	} else if fileName == "sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.ControlTowerResources+model.Yaml {
 		model.LoadRedisControlTowerAttributes(fileName)
-	} else if fileName == "sde"+string(os.PathSeparator)+"sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.CorporationActivities+model.Yaml {
+	} else if fileName == "sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.CorporationActivities+model.Yaml {
 		model.LoadRedisCorporationActivities(fileName)
-	} else if fileName == "sde"+string(os.PathSeparator)+"sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.DogmaAttributeCategories+model.Yaml {
+	} else if fileName == "sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.DogmaAttributeCategories+model.Yaml {
 		model.LoadRedisDogmaAttributeCategories(fileName)
-	} else if fileName == "sde"+string(os.PathSeparator)+"sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.DogmaAttributes+model.Yaml {
+	} else if fileName == "sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.DogmaAttributes+model.Yaml {
 		model.LoadRedisDogmaAttributes(fileName)
-	} else if fileName == "sde"+string(os.PathSeparator)+"sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.DogmaEffects+model.Yaml {
+	} else if fileName == "sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.DogmaEffects+model.Yaml {
 		model.LoadRedissdeDogmaEffects(fileName)
-	} else if fileName == "sde"+string(os.PathSeparator)+"sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.Factions+model.Yaml {
+	} else if fileName == "sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.Factions+model.Yaml {
 		model.LoadRedisFactions(fileName)
-	} else if fileName == "sde"+string(os.PathSeparator)+"sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.GraphicIDs+model.Yaml {
+	} else if fileName == "sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.GraphicIDs+model.Yaml {
 		model.LoadRedisGraphicIDs(fileName)
-	} else if fileName == "sde"+string(os.PathSeparator)+"sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.GroupIDs+model.Yaml {
+	} else if fileName == "sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.GroupIDs+model.Yaml {
 		model.LoadRedisGroupIDs(fileName)
-	} else if fileName == "sde"+string(os.PathSeparator)+"sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.IconIDs+model.Yaml {
+	} else if fileName == "sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.IconIDs+model.Yaml {
 		model.LoadRedisIconIDS(fileName)
-	} else if fileName == "sde"+string(os.PathSeparator)+"sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.Landmarks+model.Yaml {
+	} else if fileName == "sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.Landmarks+model.Yaml {
 		model.LoadLandmarks(fileName)
-	} else if fileName == "sde"+string(os.PathSeparator)+"sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.MarketGroups+model.Yaml {
+	} else if fileName == "sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.MarketGroups+model.Yaml {
 		model.LoadMarketGroups(fileName)
-	} else if fileName == "sde"+string(os.PathSeparator)+"sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.MetaGroups+model.Yaml {
+	} else if fileName == "sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.MetaGroups+model.Yaml {
 		model.LoadMetaGroups(fileName)
-	} else if fileName == "sde"+string(os.PathSeparator)+"sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.NpcCorporationDivisions+model.Yaml {
+	} else if fileName == "sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.NpcCorporationDivisions+model.Yaml {
 		model.LoadNPCCorporationDivisions(fileName)
-	} else if fileName == "sde"+string(os.PathSeparator)+"sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.NpcCorporations+model.Yaml {
+	} else if fileName == "sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.NpcCorporations+model.Yaml {
 		model.LoadNPCCorporations(fileName)
-	} else if fileName == "sde"+string(os.PathSeparator)+"sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.PlanetSchematics+model.Yaml {
+	} else if fileName == "sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.PlanetSchematics+model.Yaml {
 		model.LoadPlanetSchematics(fileName)
-	} else if fileName == "sde"+string(os.PathSeparator)+"sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.Races+model.Yaml {
+	} else if fileName == "sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.Races+model.Yaml {
 		model.LoadRaces(fileName)
-	} else if fileName == "sde"+string(os.PathSeparator)+"sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.ResearchAgents+model.Yaml {
+	} else if fileName == "sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.ResearchAgents+model.Yaml {
 		model.LoadResearchAgents(fileName)
-	} else if fileName == "sde"+string(os.PathSeparator)+"sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.SkinLicenses+model.Yaml {
+	} else if fileName == "sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.SkinLicenses+model.Yaml {
 		model.LoadSkinLicenses(fileName)
-	} else if fileName == "sde"+string(os.PathSeparator)+"sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.SkinMaterials+model.Yaml {
+	} else if fileName == "sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.SkinMaterials+model.Yaml {
 		model.LoadSkinMaterials(fileName)
-	} else if fileName == "sde"+string(os.PathSeparator)+"sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.Skins+model.Yaml {
+	} else if fileName == "sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.Skins+model.Yaml {
 		model.LoadSkins(fileName)
-	} else if fileName == "sde"+string(os.PathSeparator)+"sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.StationOperations+model.Yaml {
+	} else if fileName == "sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.StationOperations+model.Yaml {
 		model.LoadStationOperations(fileName)
-	} else if fileName == "sde"+string(os.PathSeparator)+"sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.StationServices+model.Yaml {
+	} else if fileName == "sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.StationServices+model.Yaml {
 		model.LoadStationServices(fileName)
-	} else if fileName == "sde"+string(os.PathSeparator)+"sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.TournamentRuleSets+model.Yaml {
+	} else if fileName == "sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.TournamentRuleSets+model.Yaml {
 		//TODO not implemented
-	} else if fileName == "sde"+string(os.PathSeparator)+"sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.TranslationLanguages+model.Yaml {
+	} else if fileName == "sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.TranslationLanguages+model.Yaml {
 		//TODO not implemented
-	} else if fileName == "sde"+string(os.PathSeparator)+"sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.TypeDogma+model.Yaml {
+	} else if fileName == "sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.TypeDogma+model.Yaml {
 		model.LoadTypeDogmas(fileName)
-	} else if fileName == "sde"+string(os.PathSeparator)+"sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.TypeIDs+model.Yaml {
+	} else if fileName == "sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.TypeIDs+model.Yaml {
 		model.LoadTypeIDs(fileName)
-	} else if fileName == "sde"+string(os.PathSeparator)+"sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.TypeMaterials+model.Yaml {
+	} else if fileName == "sde"+string(os.PathSeparator)+"fsd"+string(os.PathSeparator)+model.TypeMaterials+model.Yaml {
 		model.LoadTypeMaterials(fileName)
 	} else if strings.Contains(fileName, "constellation.staticdata") {
-		fmt.Println(fileName)
-	} else if strings.Contains(fileName, "solarsystem.staticdata") {
-		model.LoadSolarSystem(fileName)
-	} else if strings.Contains(fileName, "solarsystem.staticdata") {
+		//TODO not implemented
+	} else if strings.Contains(fileName, "solarsystem.yaml") {
 		model.LoadSolarSystem(fileName)
 	}
 }
@@ -199,4 +202,63 @@ func check(e error) {
 	if e != nil {
 		panic(e)
 	}
+}
+
+func CheckChecksum(zipFilePath, checksumFilePath string) bool {
+	// Read the checksum from the checksum file
+	checksumFile, err := os.Open(checksumFilePath)
+	if err != nil {
+		fmt.Println("Error opening checksum file:", err)
+		return false
+	}
+	defer checksumFile.Close()
+
+	var expectedChecksum string
+	_, err = fmt.Fscanf(checksumFile, "%s", &expectedChecksum)
+	if err != nil {
+		fmt.Println("Error reading checksum file:", err)
+		return false
+	}
+
+	// Calculate the checksum of the zip file
+	zipFile, err := os.Open(zipFilePath)
+	if err != nil {
+		fmt.Println("Error opening zip file:", err)
+		return false
+	}
+	defer zipFile.Close()
+
+	hash := md5.New()
+	if _, err := io.Copy(hash, zipFile); err != nil {
+		fmt.Println("Error calculating checksum:", err)
+		return false
+	}
+
+	calculatedChecksum := fmt.Sprintf("%x", hash.Sum(nil))
+
+	// Compare the checksums
+	return calculatedChecksum == expectedChecksum
+}
+
+func prettyPrintJSON(value interface{}) {
+	jsonString, ok := value.(string)
+	if !ok {
+		fmt.Println("Value is not a valid JSON string")
+		return
+	}
+
+	var prettyJSON map[string]interface{}
+	err := json.Unmarshal([]byte(jsonString), &prettyJSON)
+	if err != nil {
+		fmt.Println("Error unmarshalling JSON:", err)
+		return
+	}
+
+	prettyBytes, err := json.MarshalIndent(prettyJSON, "", "  ")
+	if err != nil {
+		fmt.Println("Error marshalling JSON:", err)
+		return
+	}
+
+	fmt.Println(string(prettyBytes))
 }

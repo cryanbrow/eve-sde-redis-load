@@ -1,7 +1,6 @@
 package model
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -9,6 +8,7 @@ import (
 	"strconv"
 
 	"github.com/cryanbrow/eve-sde-redis-load/data"
+	"github.com/patrickmn/go-cache"
 	"gopkg.in/yaml.v3"
 )
 
@@ -45,6 +45,6 @@ func LoadRediscontrabandTypes(path string) {
 		singleContrabandType.ID = k
 		singleContrabandTypeJSON, _ := json.Marshal(singleContrabandType)
 		redisKey := "contrabandType:" + strconv.Itoa(k)
-		data.Rdb.Set(context.Background(), redisKey, singleContrabandTypeJSON, 0)
+		data.NonExpiringCache.Set(redisKey, singleContrabandTypeJSON, cache.NoExpiration)
 	}
 }

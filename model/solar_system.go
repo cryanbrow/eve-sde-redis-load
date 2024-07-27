@@ -1,7 +1,6 @@
 package model
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -222,7 +221,7 @@ func LoadSolarSystem(path string) {
 
 	starJSON, _ := json.Marshal(sdeSolarSystem.Star)
 	redisKey := "star:" + strconv.Itoa(sdeSolarSystem.Star.ID)
-	data.Rdb.Set(context.Background(), redisKey, starJSON, 0)
+	data.NonExpiringCache.Set(redisKey, starJSON, 0)
 
 	sdeSolarSystem.StargateIDs = getStargateMapKeys(sdeSolarSystem.Stargates)
 
@@ -236,8 +235,7 @@ func LoadSolarSystem(path string) {
 
 		stargateJSON, _ := json.Marshal(stargate)
 		redisKey := "stargate:" + strconv.Itoa(stargate.ID)
-		data.Rdb.Set(context.Background(), redisKey, stargateJSON, 0)
-
+		data.NonExpiringCache.Set(redisKey, stargateJSON, 0)
 	}
 
 	for planetKey, planet := range sdeSolarSystem.Planets {
@@ -258,7 +256,7 @@ func LoadSolarSystem(path string) {
 
 		planetJSON, _ := json.Marshal(planet)
 		redisKey := "planet:" + strconv.Itoa(planet.PlanetID)
-		data.Rdb.Set(context.Background(), redisKey, planetJSON, 0)
+		data.NonExpiringCache.Set(redisKey, planetJSON, 0)
 
 		for asteroidBeltKey, asteroidBelt := range planet.AsteroidBelts {
 			asteroidBelt.Name = names[asteroidBeltKey].ItemName
@@ -270,7 +268,7 @@ func LoadSolarSystem(path string) {
 
 			asteroidBeltJSON, _ := json.Marshal(asteroidBelt)
 			redisKey := "asteroidBelt:" + strconv.Itoa(asteroidBelt.ID)
-			data.Rdb.Set(context.Background(), redisKey, asteroidBeltJSON, 0)
+			data.NonExpiringCache.Set(redisKey, asteroidBeltJSON, 0)
 
 		}
 
@@ -284,10 +282,10 @@ func LoadSolarSystem(path string) {
 
 			moonJSON, _ := json.Marshal(moon)
 			redisKey := "moon:" + strconv.Itoa(moon.ID)
-			data.Rdb.Set(context.Background(), redisKey, moonJSON, 0)
+			data.NonExpiringCache.Set(redisKey, moonJSON, 0)
 
 			for stationKey, station := range moon.NPCStations {
-				var singleStaSation staStation = staStations[stationKey]
+				var singleStaSation StaStation = staStations[stationKey]
 				station.ConstellationID = singleStaSation.ConstellationID
 				station.CorporationID = singleStaSation.CorporationID
 				station.DockingCostPerVolume = singleStaSation.DockingCostPerVolume
@@ -311,8 +309,7 @@ func LoadSolarSystem(path string) {
 
 				stationJSON, _ := json.Marshal(station)
 				redisKey := "station:" + strconv.Itoa(station.StationID)
-				data.Rdb.Set(context.Background(), redisKey, stationJSON, 0)
-
+				data.NonExpiringCache.Set(redisKey, stationJSON, 0)
 			}
 		}
 	}
@@ -326,7 +323,7 @@ func LoadSolarSystem(path string) {
 
 	solarSystemJSON, _ := json.Marshal(sdeSolarSystem)
 	redisKey = "system:" + strconv.Itoa(sdeSolarSystem.SolarSystemID)
-	data.Rdb.Set(context.Background(), redisKey, solarSystemJSON, 0)
+	data.NonExpiringCache.Set(redisKey, solarSystemJSON, 0)
 
 }
 

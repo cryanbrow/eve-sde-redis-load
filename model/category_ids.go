@@ -1,7 +1,6 @@
 package model
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -9,6 +8,7 @@ import (
 	"strconv"
 
 	"github.com/cryanbrow/eve-sde-redis-load/data"
+	"github.com/patrickmn/go-cache"
 	"gopkg.in/yaml.v3"
 )
 
@@ -49,6 +49,6 @@ func LoadRedisCategoryIDs(path string) {
 		singleCategoryID.ID = k
 		sdeCategoryIDsJSON, _ := json.Marshal(singleCategoryID)
 		redisKey := "categoryID:" + strconv.Itoa(k)
-		data.Rdb.Set(context.Background(), redisKey, sdeCategoryIDsJSON, 0)
+		data.NonExpiringCache.Set(redisKey, sdeCategoryIDsJSON, cache.NoExpiration)
 	}
 }

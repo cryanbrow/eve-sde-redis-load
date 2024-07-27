@@ -1,7 +1,6 @@
 package model
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -42,7 +41,6 @@ func LoadResearchAgents(path string) {
 		singleResearchAgent.ID = k
 		singleResearchAgentJSON, _ := json.Marshal(singleResearchAgent)
 		redisKey := "researchAgent:" + strconv.Itoa(k)
-		data.Rdb.Set(context.Background(), redisKey, singleResearchAgentJSON, 0)
-
+		data.NonExpiringCache.Set(redisKey, singleResearchAgentJSON, 0)
 	}
 }

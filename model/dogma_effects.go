@@ -1,7 +1,6 @@
 package model
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -85,7 +84,6 @@ func LoadRedissdeDogmaEffects(path string) {
 		singleDogmaEffect.ID = k
 		singleDogmaEffectJSON, _ := json.Marshal(singleDogmaEffect)
 		redisKey := "dogmaEffect:" + strconv.Itoa(k)
-		data.Rdb.Set(context.Background(), redisKey, singleDogmaEffectJSON, 0)
-
+		data.NonExpiringCache.Set(redisKey, singleDogmaEffectJSON, 0)
 	}
 }

@@ -1,7 +1,6 @@
 package model
 
 import (
-	"context"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -43,11 +42,10 @@ func LoadInvNames(path string) {
 		invIds[element.ItemName] = element.ItemID
 
 		redisKey := "invName:" + element.ItemName
-		data.Rdb.Set(context.Background(), redisKey, element.ItemID, 0)
+		data.NonExpiringCache.Set(redisKey, element.ItemName, 0)
 
 		redisKey = "invID:" + strconv.Itoa(element.ItemID)
-		data.Rdb.Set(context.Background(), redisKey, element.ItemName, 0)
-
+		data.NonExpiringCache.Set(redisKey, element.ItemName, 0)
 	}
 
 }

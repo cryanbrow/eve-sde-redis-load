@@ -1,7 +1,6 @@
 package model
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -62,12 +61,11 @@ func LoadUniqueNames(path string) {
 
 		nameJSON, _ := json.Marshal(localname)
 		redisKey := "name:" + strconv.Itoa(element.ItemID)
-		data.Rdb.Set(context.Background(), redisKey, nameJSON, 0)
+		data.NonExpiringCache.Set(redisKey, nameJSON, 0)
 
 		idJSON, _ := json.Marshal(localID)
 		redisKey = "id:" + strconv.Itoa(element.ItemID)
-		data.Rdb.Set(context.Background(), redisKey, idJSON, 0)
-
+		data.NonExpiringCache.Set(redisKey, idJSON, 0)
 	}
 
 }

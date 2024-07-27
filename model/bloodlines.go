@@ -1,7 +1,6 @@
 package model
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -9,6 +8,7 @@ import (
 	"strconv"
 
 	"github.com/cryanbrow/eve-sde-redis-load/data"
+	"github.com/patrickmn/go-cache"
 	"gopkg.in/yaml.v3"
 )
 
@@ -65,6 +65,6 @@ func LoadRedisBloodlines(path string) {
 		singleBloodline.ID = k
 		singleBloodlineJSON, _ := json.Marshal(singleBloodline)
 		redisKey := "agent:" + strconv.Itoa(k)
-		data.Rdb.Set(context.Background(), redisKey, singleBloodlineJSON, 0)
+		data.NonExpiringCache.Set(redisKey, singleBloodlineJSON, cache.NoExpiration)
 	}
 }

@@ -1,7 +1,6 @@
 package model
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -67,7 +66,6 @@ func LoadStationOperations(path string) {
 		singleStationOperation.ID = k
 		singleStationOperationJSON, _ := json.Marshal(singleStationOperation)
 		redisKey := "stationOperation:" + strconv.Itoa(k)
-		data.Rdb.Set(context.Background(), redisKey, singleStationOperationJSON, 0)
-
+		data.NonExpiringCache.Set(redisKey, singleStationOperationJSON, 0)
 	}
 }

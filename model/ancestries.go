@@ -1,7 +1,6 @@
 package model
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -9,6 +8,7 @@ import (
 	"strconv"
 
 	"github.com/cryanbrow/eve-sde-redis-load/data"
+	"github.com/patrickmn/go-cache"
 	"gopkg.in/yaml.v3"
 )
 
@@ -65,7 +65,6 @@ func LoadRedisAncestries(path string) {
 		singleAncestry.ID = k
 		singleAncestryJSON, _ := json.Marshal(singleAncestry)
 		redisKey := "ancestry:" + strconv.Itoa(k)
-		data.Rdb.Set(context.Background(), redisKey, singleAncestryJSON, 0)
-
+		data.NonExpiringCache.Set(redisKey, singleAncestryJSON, cache.NoExpiration)
 	}
 }

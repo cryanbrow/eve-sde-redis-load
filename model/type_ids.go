@@ -1,7 +1,6 @@
 package model
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -112,7 +111,6 @@ func LoadTypeIDs(path string) {
 		singleTypeID.ID = k
 		singleTypeIDJSON, _ := json.Marshal(singleTypeID)
 		redisKey := "typeID:" + strconv.Itoa(k)
-		data.Rdb.Set(context.Background(), redisKey, singleTypeIDJSON, 0)
-
+		data.TypeCache.Set(redisKey, singleTypeIDJSON, 0)
 	}
 }
